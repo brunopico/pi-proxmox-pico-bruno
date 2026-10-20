@@ -19,7 +19,7 @@ En estas capturas muestro el estado de la configuración de las interfaces de la
 | Interfaz 1 (host-only) → `vmbr0` | Host-only 192.168.20.0/24 | 192.168.20.10 | Esta interfaz me permite conectarme a la interfaz web de Proxmox desde mi Mac vía HTTPS por el puerto TCP:8006. En este bridge también van `srv-aso` y `cli-linux` |
 | Interfaz 2 (red compartida) → `vmbr1` | Red compartida (NAT) 10.0.2.0/24 | 10.0.2.100 | Esta interfaz da salida a Internet a Proxmox. Las VMs salen a Internet a través de Proxmox, que hace NAT hacia esta red |
 
-Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi Mac puedo llegar a ellas directamente para probar y administrar, y no dependen del DHCP de la red compartida de UTM. Para que tengan Internet, su gateway será Proxmox (192.168.20.10).
+Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi Mac puedo llegar a ellas directamente para probar y administrar.
 
 
 ### Tabla de direccionamiento
