@@ -6,11 +6,11 @@ URL GitHub: https://github.com/brunopico/pi-proxmox-pico-bruno.git
 
 ## Objetivo
 
-Disponer de un laboratorio de virtualización propio, reproducible y documentado, donde practicar la administración de servicios de ASO sin depender del Proxmox del centro. El laboratorio será un único nodo Proxmox VE con dos invitados: un servidor de servicio (`srv-aso`) y un cliente Linux (`cli-linux`) desde el que se comprueba el servicio. El trabajo incluye automatización con Bash y Ansible, y copias de seguridad con su restauración probada. Como el equipo tiene recursos limitados (2 núcleos, 8 GB de RAM y un disco duro mecánico), el reparto de recursos se calcula y se justifica en el inventario.
+Disponer de un laboratorio de virtualización propio, reproducible y documentado, donde practicar la administración de servicios de ASO sin depender del Proxmox del centro. El laboratorio será un único nodo Proxmox VE con dos invitados: un servidor de servicio (`srv-aso`) y un cliente Linux (`cli-linux`) desde el que se comprueba el servicio. El trabajo incluye automatización con Bash y Ansible, y copias de seguridad con su restauración probada. El servidor estará virtualizado, en un principio intentaré virtualizarlo en mi Mac usando UTM, si veo que no es posible usar la virtualización anidada usaré un servidor en la nube que tengo con Windows Server 2025.
 
 ## Modalidad
 
-Física. Proxmox VE se instalará directamente en un equipo real (Intel Pentium G4560, 8 GB de RAM, HDD de 500 GB y placa ASUS H110I-PLUS) y no en una VM de VirtualBox. Así se trabaja con el hardware real, se evita la virtualización anidada y se pueden medir las limitaciones reales del equipo. El inventario confirma que el equipo es apto con condiciones (VT-x disponible y requisitos mínimos de Proxmox cumplidos).
+Virtualizada (UTM). Mi portátil es un Mac con chip ARM, así que solo puedo virtualizar sistemas ARM a buena velocidad. Por eso uso la versión de Proxmox para ARM64 en una VM de UTM.
 
 ## Indice de documentacion
 
@@ -34,7 +34,7 @@ Física. Proxmox VE se instalará directamente en un equipo real (Intel Pentium 
 - [ ] URL entregada y acceso docente comprobado
 - [x] Modalidad indicada
 - [x] Inventario
-- [ ] Diagrama de red
+- [x] Diagrama de red
 - [ ] Instalacion Proxmox
 - [ ] Plantilla Linux
 - [ ] VMs/LXC
