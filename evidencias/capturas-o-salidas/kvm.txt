@@ -1,0 +1,5 @@
+# ls -l /dev/kvm
+ls: cannot access '/dev/kvm': No such file or directory
+
+# dmesg | grep -i -E "kvm|hyp|EL2"
+[    0.096278] kvm [1]: HYP mode not available
