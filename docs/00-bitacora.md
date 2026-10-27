@@ -44,6 +44,16 @@ las evidencias utiles; evita frases generales como "he trabajado en Proxmox".
 - Incidencias y solucion o estado pendiente: El inventario del equipo físico ya no vale para la nueva modalidad, tengo que preguntar al profesor si lo rehago con los datos del Mac. Me falta elegir el servicio ASO y revisar la RAM. Me queda comprobar en el paso siguiente si UTM permite virtualización anidada de máquinas, si no me es posible usaré un Windows Server 2025 que tengo en la nube..
 - Siguiente paso: Elegir el servicio ASO, ajustar la RAM de la VM e instalar Proxmox.
 
+## Sesion 05 - 27-10-2026
+
+- Objetivo: hacer la Fase 3, instalar Proxmox en la VM de UTM (docs/03-instalacion-proxmox.md).
+- Acciones realizadas: He creado la VM en UTM con motor QEMU, 2 vCPU, 6 GB de RAM, 70 GB de disco y dos tarjetas (host-only y red compartida). He instalado Proxmox VE 9.2 para ARM64 con ext4 (LVM), la gestión en la tarjeta host-only con la IP 192.168.20.3 y he entrado al panel desde el navegador del Mac. He guardado las salidas de hostnamectl, ip -br addr, pveversion, df -h y la comprobación de KVM, y las capturas de UTM, del instalador, del panel, de la red y del almacenamiento.
+- Decisiones y motivos: Probé el motor Apple Virtualization de UTM porque con un M4 permite virtualización anidada, pero no tiene red host-only y el diseño necesita dos tarjetas, así que me quedé con QEMU. Uso ext4 y no ZFS porque ZFS gasta más RAM y la VM solo tiene 6 GB. Como no hay virtualización anidada, srv-aso y cli-linux serán contenedores LXC.
+- Pruebas y resultados: `pveversion` da pve-manager 9.2.9 y el panel abre en https://192.168.20.3:8006. `ls -l /dev/kvm` no existe y dmesg dice `HYP mode not available`, y una VM de prueba en Proxmox no arranca por falta de KVM.
+- Documentos o evidencias: [Instalación de Proxmox](03-instalacion-proxmox.md); salidas y capturas en evidencias/capturas-o-salidas/.
+- Incidencias y solucion o estado pendiente: El instalador obliga a poner gateway en la red de gestión y la host-only no tiene, puse 192.168.20.1 para seguir. Puse el hostname brunop.local en vez de pve-pico, lo cambiaré más adelante. La IP del nodo es la .3 y en el diseño puse la .10, tengo que dejarlo igual en los dos sitios.
+- Siguiente paso: Configurar la red del diseño (vmbr1, gateway real y NAT con iptables), elegir el servicio ASO y preparar la plantilla Linux.
+
 Anadir una entrada con esta estructura en cada sesion. El historial de
 GitHub registra los commits; no hace falta incluir el hash del propio
 commit dentro de su entrada de bitacora.
