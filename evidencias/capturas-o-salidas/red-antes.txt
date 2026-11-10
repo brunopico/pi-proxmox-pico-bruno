@@ -1,0 +1,30 @@
+# Estado de la red ANTES de la fase 4 (configuración que dejó el instalador)
+
+# ip -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+nic0             DOWN
+nic1             UP
+vmbr0            UP             192.168.20.3/24 fe80::5894:a6ff:feb9:b2e6/64
+
+# ip route
+default via 192.168.20.1 dev vmbr0 proto kernel onlink
+192.168.20.0/24 dev vmbr0 proto kernel scope link src 192.168.20.3
+
+# cat /etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+iface nic1 inet manual
+
+auto vmbr0
+iface vmbr0 inet static
+        address 192.168.20.3/24
+        gateway 192.168.20.1
+        bridge-ports nic1
+        bridge-stp off
+        bridge-fd 0
+
+iface nic0 inet manual
+
+
+source /etc/network/interfaces.d/*

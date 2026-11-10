@@ -27,8 +27,8 @@ Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi M
 | Elemento | Nombre | IP | Función | Recursos |
 |---|---|---|---|---|
 | Nodo Proxmox | `pve-pico` | 192.168.20.10 (gestión) / 10.0.2.100 | Hipervisor | 2 vCPU, 6 GB RAM, 70 GB disco (VM de UTM) |
-| Servidor ASO | `srv-aso` | 192.168.20.101 | Servicio principal (___) | 1 vCPU, 1 GB, 10 GB |
-| Cliente | `cli-linux` | 192.168.20.102 | Pruebas | 1 vCPU, 1 GB, 10 GB |
+| Servidor ASO | `srv-aso` | 192.168.20.101 | Servicio principal (___) | 1 vCPU, 2 GB, 10 GB |
+| Cliente | `cli-linux` | 192.168.20.102 | Pruebas | 1 vCPU, 1 GB, 8 GB |
 
 ### Gateway y DNS
 

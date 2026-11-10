@@ -1,0 +1,31 @@
+# pvesm status
+Name              Type     Status     Total (KiB)      Used (KiB) Available (KiB)        %
+backup-lab         dir     active        28654500         3824716        23348876   13.35%
+local              dir     active        28654500         3824716        23348876   13.35%
+local-lvm      lvmthin     active        26394624               0        26394624    0.00%
+
+# df -h
+Filesystem            Size  Used Avail Use% Mounted on
+udev                  2.6G     0  2.6G   0% /dev
+tmpfs                 591M  1.1M  590M   1% /run
+/dev/mapper/pve-root   28G  3.7G   23G  15% /
+tmpfs                 2.9G   40M  2.9G   2% /dev/shm
+efivarfs              256K   17K  240K   7% /sys/firmware/efi/efivars
+tmpfs                 5.0M     0  5.0M   0% /run/lock
+tmpfs                 1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
+tmpfs                 2.9G     0  2.9G   0% /tmp
+/dev/vda2             511M  9.5M  502M   2% /boot/efi
+/dev/fuse             128M   24K  128M   1% /etc/pve
+tmpfs                 1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
+tmpfs                 1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyAMA0.service
+tmpfs                 591M  4.0K  591M   1% /run/user/0
+
+# lvs
+  LV   VG  Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  data pve twi-a-tz-- 25.17g             0.00   1.58
+  root pve -wi-ao---- 27.93g
+  swap pve -wi-ao----  5.76g
+
+# vgs
+  VG  #PV #LV #SN Attr   VSize   VFree
+  pve   1   3   0 wz--n- <69.50g <8.63g

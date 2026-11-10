@@ -1,0 +1,18 @@
+# qemu-img info (disco de la VM después de convertirlo a tamaño fijo)
+image: 8C8DDC22-4762-46F2-AD24-66CE094978EC.qcow2
+file format: qcow2
+virtual size: 70 GiB (75161927680 bytes)
+disk size: 70 GiB
+cluster_size: 65536
+Format specific information:
+    compat: 1.1
+    compression type: zlib
+    lazy refcounts: false
+    refcount bits: 16
+    corrupt: false
+    extended l2: false
+Child node '/file':
+    filename: 8C8DDC22-4762-46F2-AD24-66CE094978EC.qcow2
+    protocol type: file
+    file length: 70 GiB (75173658624 bytes)
+    disk size: 70 GiB

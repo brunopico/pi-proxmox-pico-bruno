@@ -1,0 +1,6 @@
+# lsmod | grep virtio
+virtio_gpu            102400  0
+virtio_dma_buf         12288  1 virtio_gpu
+vmw_vsock_virtio_transport_common    57344  1 vsock_loopback
+vsock                  73728  3 vmw_vsock_virtio_transport_common,vsock_loopback,vmw_vsock_vmci_transport
+virtio_rng             12288  0

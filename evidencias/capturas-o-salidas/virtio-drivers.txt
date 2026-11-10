@@ -1,0 +1,11 @@
+# ls /sys/bus/virtio/drivers
+scmi-virtio
+virtio_balloon
+virtio_blk
+virtio_console
+virtio_gpu
+virtio_iommu
+virtio_net
+virtio_rng
+virtio_rproc_serial
+virtio_scsi

@@ -1,0 +1,28 @@
+# cat /etc/network/interfaces (configuración final de la fase 4)
+auto lo
+iface lo inet loopback
+
+iface nic0 inet manual
+iface nic1 inet manual
+
+# Gestión + invitados (host-only). SIN gateway
+auto vmbr0
+iface vmbr0 inet static
+        address 192.168.20.10/24
+        bridge-ports nic1
+        bridge-stp off
+        bridge-fd 0
+        post-up   echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up   iptables -t nat -A POSTROUTING -s 192.168.20.0/24 -o vmbr1 -j MASQUERADE
+        post-down iptables -t nat -D POSTROUTING -s 192.168.20.0/24 -o vmbr1 -j MASQUERADE
+
+# Salida a Internet (red compartida UTM)
+auto vmbr1
+iface vmbr1 inet static
+        address 10.0.2.100/24
+        gateway 10.0.2.1
+        bridge-ports nic0
+        bridge-stp off
+        bridge-fd 0
+
+source /etc/network/interfaces.d/*

@@ -1,0 +1,19 @@
+# ip -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+nic0             UP
+nic1             UP
+vmbr0            UP             192.168.20.10/24 fe80::5894:a6ff:feb9:b2e6/64
+vmbr1            UP             10.0.2.100/24 fe80::e1:4bff:fed9:7221/64
+
+# ip route
+default via 10.0.2.1 dev vmbr1 proto kernel onlink
+10.0.2.0/24 dev vmbr1 proto kernel scope link src 10.0.2.100
+192.168.20.0/24 dev vmbr0 proto kernel scope link src 192.168.20.10
+
+# hostname -i
+192.168.20.10
+
+# iptables -t nat -L POSTROUTING -n -v
+Chain POSTROUTING (policy ACCEPT 24 packets, 1712 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 MASQUERADE  all  --  *      vmbr1   192.168.20.0/24      0.0.0.0/0

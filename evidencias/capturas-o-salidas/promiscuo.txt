@@ -1,0 +1,2 @@
+# ip -d link show nic1 | grep promiscuity
+    link/ether 5a:94:a6:b9:b2:e6 brd ff:ff:ff:ff:ff:ff promiscuity 1 allmulti 1 minmtu 68 maxmtu 65535

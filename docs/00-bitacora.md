@@ -54,6 +54,16 @@ las evidencias utiles; evita frases generales como "he trabajado en Proxmox".
 - Incidencias y solucion o estado pendiente: El instalador obliga a poner gateway en la red de gestión y la host-only no tiene, puse 192.168.20.1 para seguir. Puse el hostname brunop.local en vez de pve-pico, lo cambiaré más adelante. La IP del nodo es la .3 y en el diseño puse la .10, tengo que dejarlo igual en los dos sitios.
 - Siguiente paso: Configurar la red del diseño (vmbr1, gateway real y NAT con iptables), elegir el servicio ASO y preparar la plantilla Linux.
 
+## Sesion 06 - 10-11-2026
+
+- Objetivo: hacer la Fase 4, dejar el nodo preparado (almacenamiento, red, accesos y recursos) y aplicar las mejoras de la VM que pidió el profesor (docs/03-instalacion-proxmox.md).
+- Acciones realizadas: En UTM he dejado el disco de tamaño fijo con `qemu-img` y he probado la interfaz SCSI. En Proxmox he creado `backup-lab` para las copias, he configurado la red del diseño (`vmbr0` con la .10 y `vmbr1` con 10.0.2.100 y salida a Internet), he puesto el NAT para los invitados y he cambiado los repositorios enterprise por el No-Subscription.
+- Decisiones y motivos: Sigo con UTM porque en un Mac ARM VirtualBox tampoco tiene VT-x. De las cinco mejoras hago tres (paravirtualización, modo promiscuo y disco fijo). Cambio la IP del nodo a la .10 para que cuadre con el diagrama. Uso el repositorio No-Subscription porque es gratis.
+- Pruebas y resultados: El panel abre en https://192.168.20.10:8006. La ruta por defecto va por 10.0.2.1, el ping al gateway funciona y `apt update` va sin errores. `nic1` está en modo promiscuo, la VM tiene 5,8 GiB de RAM y el disco ocupa 70 GiB.
+- Documentos o evidencias: [Configuración base del nodo](03-instalacion-proxmox.md#fase-4-configuración-base-del-nodo); salidas y capturas en evidencias/capturas-o-salidas/.
+- Incidencias y solucion o estado pendiente: Con el disco en SCSI la VM no arrancaba porque no veía el disco. Volví a VirtIO y el profesor me dijo que vale. Los repositorios enterprise daban error 401 y los cambié por el No-Subscription. El ping a Internet no responde porque el centro lo bloquea por sus políticas, pero `apt update` descarga bien.
+- Siguiente paso: Actualizar los paquetes, descargar una plantilla LXC ARM64 y preparar la plantilla Linux.
+
 Anadir una entrada con esta estructura en cada sesion. El historial de
 GitHub registra los commits; no hace falta incluir el hash del propio
 commit dentro de su entrada de bitacora.

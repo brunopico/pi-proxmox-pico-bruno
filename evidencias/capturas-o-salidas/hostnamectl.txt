@@ -1,4 +1,4 @@
- Static hostname: brunop
+ Static hostname: pve-pico
        Icon name: computer-vm
          Chassis: vm
       Machine ID: (eliminado)
@@ -12,4 +12,4 @@ Operating System: Debian GNU/Linux 13 (trixie)
   Hardware Model: QEMU Virtual Machine
 Firmware Version: 0.0.0
    Firmware Date: Fri 2015-02-06
-    Firmware Age: 11y 8month 2w 6d
+    Firmware Age: 11y 9month 3d
