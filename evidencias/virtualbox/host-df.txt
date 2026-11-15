@@ -1,0 +1,2 @@
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/nvme0n1p2   930G    15G  868G   2% /

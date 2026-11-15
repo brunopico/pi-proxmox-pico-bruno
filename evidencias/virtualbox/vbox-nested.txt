@@ -1,0 +1,2 @@
+Nested VT-x/AMD-V:           enabled
+Nested Paging:               enabled

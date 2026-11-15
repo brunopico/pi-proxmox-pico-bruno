@@ -1,0 +1,6 @@
+NAME          SIZE ROTA TYPE MOUNTPOINT
+zram0         3,8G    0 disk [SWAP]
+nvme0n1     953,9G    0 disk 
+├─nvme0n1p1   976M    0 part /boot/efi
+├─nvme0n1p2 945,1G    0 part /
+└─nvme0n1p3   7,8G    0 part [SWAP]
