@@ -1,0 +1,9 @@
+Memory size:                 4096MB
+Number of CPUs:              3
+Nested VT-x/AMD-V:           enabled
+Nested Paging:               enabled
+Paravirt. Provider:          Default
+Effective Paravirt. Prov.:   KVM
+#1: 'SCSI', Type: VirtioSCSI, Instance: 0, Ports: 1 (max 256), Bootable
+NIC 1:                       MAC: 0800274D1CBE, Attachment: Host-only Interface 'vboxnet0', Cable connected: on, Trace: off (file: none), Type: virtio, Reported speed: 0 Mbps, Boot priority: 0, Promisc Policy: allow-all, Bandwidth group: none
+NIC 2:                       MAC: 08002728B675, Attachment: NAT Network 'NatNetwork', Cable connected: on, Trace: off (file: none), Type: virtio, Reported speed: 0 Mbps, Boot priority: 0, Promisc Policy: allow-all, Bandwidth group: none

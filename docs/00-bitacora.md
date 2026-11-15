@@ -64,6 +64,16 @@ las evidencias utiles; evita frases generales como "he trabajado en Proxmox".
 - Incidencias y solucion o estado pendiente: Con el disco en SCSI la VM no arrancaba porque no veía el disco. Volví a VirtIO y el profesor me dijo que vale. Los repositorios enterprise daban error 401 y los cambié por el No-Subscription. El ping a Internet no responde porque el centro lo bloquea por sus políticas, pero `apt update` descarga bien.
 - Siguiente paso: Actualizar los paquetes, descargar una plantilla LXC ARM64 y preparar la plantilla Linux.
 
+## Sesion 07 - 14-11-2026
+
+- Objetivo: pasar el laboratorio a mi portátil con Debian y VirtualBox y repetir las fases 3 y 4 (docs/03-instalacion-proxmox.md).
+- Acciones realizadas: He guardado el estado del Mac en la etiqueta `utm-macos-fase4` y trabajo en la rama `virtualbox-debian`. He instalado VirtualBox, creado la red host-only `vboxnet0` y la VM `pve-pico` (3 vCPU, 4 GB, 70 GB, EFI, virtio-scsi, virtio-net y VT-x anidado) y he instalado Proxmox VE 9.2 amd64. Después he configurado `vmbr0` y `vmbr1` con NAT, el repositorio No-Subscription y `backup-lab`, y he hecho las cinco mejoras de la VM.
+- Decisiones y motivos: Cambio de equipo porque en VirtualBox hay VT-x anidado y KVM, así que `srv-aso` podrá ser una VM. Bajo la RAM de la VM a 4 GB porque el portátil tiene 7,6 GiB. Uso Red NAT en vez del NAT simple porque el NAT simple no respondía detrás del bridge.
+- Pruebas y resultados: El SHA256 de la ISO coincide. `/dev/kvm` existe y `pveversion` da 9.2.2. El panel abre en https://192.168.20.10:8006, el ping a 10.0.2.1 funciona, `deb.debian.org` se resuelve y `apt update` va sin errores. El disco sale como `fixed default`.
+- Documentos o evidencias: [Migración a VirtualBox](03-instalacion-proxmox.md#migración-a-virtualbox-debian); salidas y capturas en evidencias/virtualbox/.
+- Incidencias y solucion o estado pendiente: Secure Boot (firma MOK), VT-x anidado en gris (`VBoxManage`), hostname mal escrito en el instalador, adaptadores al revés, NAT simple sin respuesta (Red NAT), regla MASQUERADE duplicada y disco dinámico (`clonemedium`). Todo está explicado en el documento.
+- Siguiente paso: Actualizar los 213 paquetes, descargar las plantillas y crear `srv-aso` y `cli-linux`.
+
 Anadir una entrada con esta estructura en cada sesion. El historial de
 GitHub registra los commits; no hace falta incluir el hash del propio
 commit dentro de su entrada de bitacora.

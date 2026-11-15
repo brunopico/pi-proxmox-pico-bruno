@@ -1,0 +1,15 @@
+Name              Type     Status     Total (KiB)      Used (KiB) Available (KiB)        %
+backup-lab         dir     active        29106188         4339588        23262756   14.91%
+local              dir     active        29106188         4339588        23262756   14.91%
+local-lvm      lvmthin     active        27783168               0        27783168    0.00%
+
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mapper/pve-root   28G  4.2G   23G  16% /
+
+  LV   VG  Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  data pve twi-a-tz-- <26.50g             0.00   1.58                            
+  root pve -wi-ao----  28.37g                                                    
+  swap pve -wi-ao----   4.00g                                                    
+
+  VG  #PV #LV #SN Attr   VSize   VFree 
+  pve   1   3   0 wz--n- <69.50g <8.63g

@@ -1,0 +1,43 @@
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+nic0             UP             
+nic1             UP             
+vmbr0            UP             192.168.20.10/24 fe80::a00:27ff:fe4d:1cbe/64 
+vmbr1            UP             10.0.2.100/24 fe80::a00:27ff:fe28:b675/64 
+
+default via 10.0.2.1 dev vmbr1 proto kernel onlink 
+10.0.2.0/24 dev vmbr1 proto kernel scope link src 10.0.2.100 
+192.168.20.0/24 dev vmbr0 proto kernel scope link src 192.168.20.10 
+
+auto lo
+iface lo inet loopback
+
+iface nic0 inet manual
+iface nic1 inet manual
+
+# Gestión + invitados (host-only vboxnet0). SIN gateway
+auto vmbr0
+iface vmbr0 inet static
+        address 192.168.20.10/24
+        bridge-ports nic0
+        bridge-stp off
+        bridge-fd 0
+        post-up   echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up   iptables -t nat -C POSTROUTING -s 192.168.20.0/24 -o vmbr1 -j MASQUERADE 2>/dev/null || iptables -t nat -A POSTROUTING -s 192.168.20.0/24 -o vmbr1 -j MASQUERADE
+        post-down iptables -t nat -D POSTROUTING -s 192.168.20.0/24 -o vmbr1 -j MASQUERADE
+
+# Salida a Internet (Red NAT de VirtualBox, NatNetwork 10.0.2.0/24)
+auto vmbr1
+iface vmbr1 inet static
+        address 10.0.2.100/24
+        gateway 10.0.2.1
+        bridge-ports nic1
+        bridge-stp off
+        bridge-fd 0
+
+source /etc/network/interfaces.d/*
+
+Chain POSTROUTING (policy ACCEPT 54 packets, 4079 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 MASQUERADE  all  --  *      vmbr1   192.168.20.0/24      0.0.0.0/0           
+
+1

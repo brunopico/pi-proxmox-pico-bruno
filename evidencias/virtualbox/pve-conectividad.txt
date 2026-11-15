@@ -1,0 +1,30 @@
+PING 10.0.2.1 (10.0.2.1) 56(84) bytes of data.
+64 bytes from 10.0.2.1: icmp_seq=1 ttl=64 time=0.367 ms
+64 bytes from 10.0.2.1: icmp_seq=2 ttl=64 time=0.737 ms
+64 bytes from 10.0.2.1: icmp_seq=3 ttl=64 time=0.832 ms
+
+--- 10.0.2.1 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2067ms
+rtt min/avg/max/mdev = 0.367/0.645/0.832/0.200 ms
+
+search local
+nameserver 10.0.2.1
+nameserver 1.1.1.1
+
+199.232.34.132  STREAM debian.map.fastlydns.net
+
+Get:5 http://deb.debian.org/debian trixie/contrib amd64 Packages [53.9 kB]
+Get:6 http://security.debian.org/debian-security trixie-security/main amd64 Packages [304 kB]
+Get:7 http://deb.debian.org/debian trixie/non-free-firmware amd64 Packages [6,884 B]
+Get:8 http://deb.debian.org/debian trixie/main amd64 Packages [9,678 kB]
+Get:9 http://security.debian.org/debian-security trixie-security/contrib amd64 Packages [3,152 B]
+Get:10 http://deb.debian.org/debian trixie-updates/main amd64 Packages [1,108 B]
+Err:11 https://enterprise.proxmox.com/debian/ceph-squid trixie InRelease
+  401  Unauthorized [IP: 51.91.38.34 443]
+Err:12 https://enterprise.proxmox.com/debian/pve trixie InRelease
+  401  Unauthorized [IP: 51.91.38.34 443]
+Reading package lists...
+Error: Failed to fetch https://enterprise.proxmox.com/debian/ceph-squid/dists/trixie/InRelease  401  Unauthorized [IP: 51.91.38.34 443]
+Error: The repository 'https://enterprise.proxmox.com/debian/ceph-squid trixie InRelease' is not signed.
+Error: Failed to fetch https://enterprise.proxmox.com/debian/pve/dists/trixie/InRelease  401  Unauthorized [IP: 51.91.38.34 443]
+Error: The repository 'https://enterprise.proxmox.com/debian/pve trixie InRelease' is not signed.

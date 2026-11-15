@@ -1,13 +1,18 @@
 # 02-diagrama-red
 
 ## Objetivo
-En esta fase del proyecto voy a decidir qué redes va a usar la VM de Proxmox, en mi caso uso UTM para virtualizarla, debo de decidir qué redes configuro y qué IP tiene la máquina. La idea es poder gestionar Proxmox desde mi Mac y que Proxmox y las máquinas invitadas tengan salida a la red.
+En esta fase del proyecto voy a decidir qué redes va a usar la VM de Proxmox, en mi caso uso VirtualBox en Debian para virtualizarla (antes UTM en el Mac), debo de decidir qué redes configuro y qué IP tiene la máquina. La idea es poder gestionar Proxmox desde mi portátil y que Proxmox y las máquinas invitadas tengan salida a la red.
 
 ## Procedimiento
-Para este laboratorio necesito que Proxmox esté conectado a dos redes, la primera es la red 'host only'. Host only la he configurado con la red 192.168.20.0/24, esta red la usaré para conectarme a Proxmox vía HTTPS por el puerto TCP:8006. La segunda es red NAT o en mi caso (uso UTM en vez de VirtualBox) 'red compartida'. Que en UTM se llame red compartida no implica que sea adaptador puente, hace una red NAT la cual he configurado para que sea 10.0.2.0/24.
+Para este laboratorio necesito que Proxmox esté conectado a dos redes, la primera es la red 'host only'. Host only la he configurado con la red 192.168.20.0/24, esta red la usaré para conectarme a Proxmox vía HTTPS por el puerto TCP:8006. La segunda es una red NAT. En VirtualBox uso la 'Red NAT' (`NatNetwork`) con la red 10.0.2.0/24 y no el modo 'NAT' simple, porque el NAT simple no respondía detrás del bridge de Proxmox (está explicado en la [instalación](03-instalacion-proxmox.md#migración-a-virtualbox-debian)). En UTM esta red se llamaba 'red compartida'.
 
 ### Configuración de la VM
 En estas capturas muestro el estado de la configuración de las interfaces de la VM.
+
+![Red Host Only en VirtualBox](../evidencias/virtualbox/vbox_red_hostonly.png)
+![Red NAT en VirtualBox](../evidencias/virtualbox/vbox_red_nat.png)
+
+Antes, en UTM:
 
 ![Red Host Only](../evidencias/capturas-o-salidas/red_hostonly_utm.png)
 ![Red NAT](../evidencias/capturas-o-salidas/red_compartida_utm.png)
@@ -16,34 +21,34 @@ En estas capturas muestro el estado de la configuración de las interfaces de la
 
 | Interfaz / bridge | Red | IP del nodo | Para qué la uso |
 |---|---|---|---|
-| Interfaz 1 (host-only) → `vmbr0` | Host-only 192.168.20.0/24 | 192.168.20.10 | Esta interfaz me permite conectarme a la interfaz web de Proxmox desde mi Mac vía HTTPS por el puerto TCP:8006. En este bridge también van `srv-aso` y `cli-linux` |
-| Interfaz 2 (red compartida) → `vmbr1` | Red compartida (NAT) 10.0.2.0/24 | 10.0.2.100 | Esta interfaz da salida a Internet a Proxmox. Las VMs salen a Internet a través de Proxmox, que hace NAT hacia esta red |
+| `nic0` (host-only `vboxnet0`) → `vmbr0` | Host-only 192.168.20.0/24 | 192.168.20.10 | Esta interfaz me permite conectarme a la interfaz web de Proxmox desde mi portátil vía HTTPS por el puerto TCP:8006. En este bridge también van `srv-aso` y `cli-linux` |
+| `nic1` (Red NAT `NatNetwork`) → `vmbr1` | Red NAT 10.0.2.0/24 | 10.0.2.100 | Esta interfaz da salida a Internet a Proxmox. Las VMs salen a Internet a través de Proxmox, que hace NAT hacia esta red |
 
-Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi Mac puedo llegar a ellas directamente para probar y administrar.
+Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi portátil puedo llegar a ellas directamente para probar y administrar.
 
 
 ### Tabla de direccionamiento
 
 | Elemento | Nombre | IP | Función | Recursos |
 |---|---|---|---|---|
-| Nodo Proxmox | `pve-pico` | 192.168.20.10 (gestión) / 10.0.2.100 | Hipervisor | 2 vCPU, 6 GB RAM, 70 GB disco (VM de UTM) |
-| Servidor ASO | `srv-aso` | 192.168.20.101 | Servicio principal (___) | 1 vCPU, 2 GB, 10 GB |
-| Cliente | `cli-linux` | 192.168.20.102 | Pruebas | 1 vCPU, 1 GB, 8 GB |
+| Nodo Proxmox | `pve-pico` | 192.168.20.10 (gestión) / 10.0.2.100 | Hipervisor | 3 vCPU, 4 GB RAM, 70 GB disco fijo (VM de VirtualBox) |
+| Servidor ASO | `srv-aso` | 192.168.20.101 | Servicio principal (___), VM | 1 vCPU, 1 GB, 10 GB |
+| Cliente | `cli-linux` | 192.168.20.102 | Pruebas, LXC | 1 vCPU, 512 MB, 8 GB |
 
 ### Gateway y DNS
 
 | Red / equipo | Gateway | DNS | Comentario |
 |---|---|---|---|
-| `pve-pico` en host-only 192.168.20.0/24 | Sin gateway | No aplica | Solo se usa para gestionar Proxmox desde el Mac |
-| `pve-pico` en red compartida 10.0.2.0/24 | 10.0.2.1 | 10.0.2.1, 1.1.1.1 | 10.0.2.1 es el Mac, que reenvía las consultas al DNS de la red en la que esté |
+| `pve-pico` en host-only 192.168.20.0/24 | Sin gateway | No aplica | Solo se usa para gestionar Proxmox desde el portátil |
+| `pve-pico` en Red NAT 10.0.2.0/24 | 10.0.2.1 | 10.0.2.1, 1.1.1.1 | 10.0.2.1 es el router de la Red NAT de VirtualBox, que reenvía las consultas al DNS del portátil |
 | `srv-aso` y `cli-linux` (192.168.20.0/24) | 192.168.20.10 | 10.0.2.1, 1.1.1.1 | Salen a Internet a través de Proxmox, que hace NAT hacia la red compartida |
 
 ### Puertos necesarios
 
 | Origen | Destino | Puerto | Para qué |
 |---|---|---|---|
-| Mac | `pve-pico` (192.168.20.10) | 8006/TCP | Web de Proxmox |
-| Mac | `pve-pico` (192.168.20.10) | 22/TCP | SSH al nodo |
+| Portátil (Debian) | `pve-pico` (192.168.20.10) | 8006/TCP | Web de Proxmox |
+| Portátil (Debian) | `pve-pico` (192.168.20.10) | 22/TCP | SSH al nodo |
 | `cli-linux` | `srv-aso` | ___ | Servicio ASO |
 | Invitados | Internet (a través de Proxmox) | 80, 443/TCP y 53/UDP | Actualizaciones y DNS |
 
@@ -51,9 +56,9 @@ Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi M
 
 ```mermaid
 flowchart TD
-    Mac["Mac (UTM)"] -->|"Host-only 192.168.20.0/24<br>8006 y 22"| VMBR0["vmbr0<br>192.168.20.0/24"]
+    Mac["Portátil Debian (VirtualBox)"] -->|"Host-only 192.168.20.0/24<br>8006 y 22"| VMBR0["vmbr0<br>192.168.20.0/24"]
     VMBR0 --- PVE["pve-pico<br>192.168.20.10 / 10.0.2.100<br>Nodo Proxmox"]
-    PVE -->|"NAT (salida a Internet)"| VMBR1["vmbr1<br>Red compartida UTM 10.0.2.0/24"]
+    PVE -->|"NAT (salida a Internet)"| VMBR1["vmbr1<br>Red NAT VirtualBox 10.0.2.0/24"]
     VMBR1 --> NET["Internet"]
     VMBR0 --> SRV["srv-aso<br>192.168.20.101<br>Servicio ASO"]
     VMBR0 --> CLI["cli-linux<br>192.168.20.102<br>Cliente pruebas"]
@@ -72,6 +77,8 @@ En este apartado no he usado ningún comando, realizaré las configuraciones en 
 
 ## Evidencias
 
+- [Red host-only en VirtualBox](../evidencias/virtualbox/vbox_red_hostonly.png): `vboxnet0` con 192.168.20.1/24 y sin DHCP.
+- [Red NAT en VirtualBox](../evidencias/virtualbox/vbox_red_nat.png): `NatNetwork` con 10.0.2.0/24.
 - [Red host-only en UTM](../evidencias/capturas-o-salidas/red_hostonly_utm.png): adaptador host-only de la VM, con la red 192.168.20.0/24.
 - [Red compartida en UTM](../evidencias/capturas-o-salidas/red_compartida_utm.png): adaptador de red compartida de la VM, con la red NAT 10.0.2.0/24.
 
