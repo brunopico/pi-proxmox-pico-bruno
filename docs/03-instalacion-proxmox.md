@@ -395,19 +395,22 @@ Igual que en el Mac, pero aquí `nic0` es la host-only y `nic1` la NAT ([pve-red
 Los invitados salen por `vmbr1` con una regla MASQUERADE. La regla se añadía otra vez en cada `ifreload -a`, así que la cambié para que primero compruebe si existe (`iptables -C ... || iptables -A ...`). El DNS del nodo es 10.0.2.1 y 1.1.1.1. El ping al gateway funciona y `deb.debian.org` se resuelve ([pve-conectividad.txt](../evidencias/virtualbox/pve-conectividad.txt)).
 
 ![Red NAT](../evidencias/virtualbox/vbox_red_nat.png)
+![Nodo > System > Network](../evidencias/virtualbox/red_fase4.png)
 
 ### 6. Repositorios y almacenamiento
 Los repositorios enterprise daban error 401. Los desactivé y añadí el No-Subscription. Ahora `apt update` va sin errores y hay 213 paquetes para actualizar ([pve-apt-update.txt](../evidencias/virtualbox/pve-apt-update.txt)).
 
 He creado `backup-lab` en `/srv/backup-lab` solo para copias ([pve-almacenamiento.txt](../evidencias/virtualbox/pve-almacenamiento.txt)):
 
-| Almacenamiento | Tipo | Total | Libre | Para qué lo uso |
-|---|---|---|---|---|
-| `local` | Directorio | 27,8 GiB | 22,2 GiB | Plantillas e ISOs |
-| `local-lvm` | LVM-Thin | 26,5 GiB | 26,5 GiB | Discos de `srv-aso` y `cli-linux` |
-| `backup-lab` | Directorio (mismo disco que `local`) | 27,8 GiB | 22,2 GiB | Copias |
+| Almacenamiento | Tipo | Contenido admitido | Total | Libre | Para qué lo uso |
+|---|---|---|---|---|---|
+| `local` | Directorio (`/var/lib/vz`) | Backup, Import, ISO y plantillas de contenedor | 27,8 GiB | 22,2 GiB | Plantillas LXC e ISOs |
+| `local-lvm` | LVM-Thin | Discos de VM y contenedores | 26,5 GiB | 26,5 GiB | Discos de `srv-aso` y `cli-linux` |
+| `backup-lab` | Directorio (`/srv/backup-lab`) | Solo backups | 27,8 GiB (el mismo que `local`) | 22,2 GiB | Copias de la fase 9 |
 
-La swap es de 4 GB y en el grupo `pve` quedan 8,63 GB sin usar.
+La swap es de 4 GB y en el grupo `pve` quedan 8,63 GB sin usar. `local-lvm` solo guarda discos, así que las copias van a `backup-lab`.
+
+**Riesgo de las copias:** `backup-lab` está dentro del disco de la VM (`pve-pico-fijo.vdi`), y ese archivo está en el mismo NVMe que Debian, que tiene 868 GB libres ([host-df.txt]({E}host-df.txt)). Si falla el NVMe o se corrompe el VDI, pierdo el laboratorio y las copias a la vez. En la fase 9 sacaré una copia fuera de la VM.
 
 ![Repositorios](../evidencias/virtualbox/repos_despues.png)
 ![Storage](../evidencias/virtualbox/storage_fase4.png)
@@ -424,19 +427,75 @@ En VirtualBox he podido hacer las cinco mejoras ([pve-mejoras.txt](../evidencias
 | Controlador virtio-scsi | Hecha | `Type: VirtioSCSI` y driver `virtio_scsi` |
 
 ### 8. Accesos y recursos
-Sigo usando solo `root@pam` y el firewall de Proxmox desactivado y sin reglas, por los mismos motivos que en el Mac.
+| Cuenta | Realm | Permisos | Para qué la uso |
+|---|---|---|---|
+| `root` | Linux PAM | Administrador de todo | Es la única cuenta: panel, consola y SSH |
+
+Como el laboratorio es solo mío, me vale con `root@pam`. En un entorno real crearía un usuario con el rol `PVEVMAdmin`, que maneja las máquinas pero no el nodo. Para no escribir la contraseña en cada comando he copiado mi clave pública con `ssh-copy-id`. Ni las contraseñas ni las claves salen en las capturas ni en el repositorio.
+
+El firewall de Proxmox lo dejo desactivado y sin reglas, porque no es obligatorio. El laboratorio ya está aislado:
+- Al panel y al SSH solo se llega por `vboxnet0`, una red host-only que solo existe entre mi portátil y la VM.
+- Los invitados salen a Internet solo a través del nodo, con NAT.
+- La Red NAT de VirtualBox también es NAT, así que desde fuera no se puede entrar a la VM.
 
 ![Usuarios](../evidencias/virtualbox/usuarios_fase4.png)
 ![Firewall](../evidencias/virtualbox/firewall_fase4.png)
 
-| Elemento | vCPU | RAM | Disco |
-|---|---|---|---|
-| Debian (anfitrión) | 5 hilos libres | 3,6 GiB | NVMe, 868 GB libres |
-| VM `pve-pico` | 3 | 4 GB (3,8 GiB visibles) | 70 GB fijos |
-| `srv-aso` (VM) | 1 | 1 GB | 10 GB en `local-lvm` |
-| `cli-linux` (LXC) | 1 | 512 MB | 8 GB en `local-lvm` |
+| Elemento | CPU/vCPU | RAM | Disco | Motivo |
+|---|---|---|---|---|
+| Debian (anfitrión) | 5 hilos de 8 | 3,6 GiB | NVMe, 868 GB libres | Que el portátil siga yendo bien con la VM encendida |
+| VM `pve-pico` (VirtualBox) | 3 vCPU | 4 GB | 70 GB fijos | Todo el laboratorio va dentro |
+| Nodo Proxmox | Comparte las 3 vCPU | 1,5 GB | Raíz de 28,4 GB y swap de 4 GB | Sistema y panel ([pve-mejoras.txt]({E}pve-mejoras.txt): usa 1,5 GiB) |
+| `srv-aso` (VM) | 1 vCPU | 1 GB | 10 GB en `local-lvm` | Servicio principal; como es VM necesita más que un LXC |
+| `cli-linux` (LXC) | 1 vCPU | 512 MB | 8 GB en `local-lvm` | Solo para probar el servicio |
+| Plantillas, ISOs, copias y margen | — | 1 GB de margen | 8,5 GB en `local-lvm` y 22,2 GB en la raíz | Clonar y hacer copias sin quedarme sin espacio |
 
-4 GB − 1,5 GB que gasta el nodo − 1 GB − 0,5 GB = 1 GB de margen. Si hace falta, el nodo tiene 4 GB de swap.
+- **RAM:** 4 GB − 1,5 del nodo − 1 de `srv-aso` − 0,5 de `cli-linux` = 1 GB de margen, y el nodo tiene 4 GB de swap.
+- **Disco:** en `local-lvm` quedan 26,5 − 10 − 8 = 8,5 GB para clones. En la raíz hay 22,2 GB para plantillas, ISOs y copias.
+- **CPU:** las 3 vCPU las comparten el nodo y los dos invitados. Con poco uso van bien a la vez.
+
+No asigno todo lo que tiene el portátil: dejo 3,6 GiB y 5 hilos para Debian.
+
+
+## Comandos usados
+
+```bash
+# En Debian (anfitrión)
+sha256sum proxmox-ve_9.2-1.iso
+VBoxManage modifyvm "pve-pico" --nested-hw-virt on
+VBoxManage clonemedium disk pve-pico.vdi pve-pico-fijo.vdi --format VDI --variant Fixed
+VBoxManage storageattach pve-pico --storagectl SCSI --port 0 --device 0 --type hdd --medium pve-pico-fijo.vdi
+VBoxManage showvminfo pve-pico
+VBoxManage showmediuminfo pve-pico-fijo.vdi
+ssh-copy-id root@192.168.20.10
+
+# En el nodo
+hostnamectl; ip -br addr; ip route; pveversion; ls -l /dev/kvm
+cp /etc/network/interfaces /root/interfaces.bak
+ifreload -a
+iptables -t nat -L POSTROUTING -n -v
+ping -c3 10.0.2.1; getent ahostsv4 deb.debian.org; apt update
+mkdir -p /srv/backup-lab
+pvesm add dir backup-lab --path /srv/backup-lab --content backup
+pvesm status; df -h /; lvs; vgs
+ls /sys/bus/virtio/drivers; lsblk; ip -d link show nic0; free -h
+```
+
+## Evidencias
+
+- [host-*.txt](../evidencias/virtualbox/host-lscpu.txt): datos del portátil (CPU con VT-x, 7,6 GiB, NVMe, Debian 13.7 y Secure Boot activado).
+- [iso-sha256.txt](../evidencias/virtualbox/iso-sha256.txt): el SHA256 de la ISO coincide con el de la web de Proxmox.
+- [vbox-nested.txt](../evidencias/virtualbox/vbox-nested.txt): VT-x anidado activado en la VM.
+- [pve-fase3.txt](../evidencias/virtualbox/pve-fase3.txt): hostname `pve-pico`, Proxmox 9.2.2 y `/dev/kvm` presente.
+- [pve-red-antes.txt](../evidencias/virtualbox/pve-red-antes.txt): red que dejó el instalador, solo `vmbr0` con el gateway falso 192.168.20.1 y `nic1` apagada.
+- [pve-red-despues.txt](../evidencias/virtualbox/pve-red-despues.txt): `vmbr0` y `vmbr1` levantados, ruta por 10.0.2.1 y una sola regla NAT. Queda probar el NAT desde los invitados en la fase 5.
+- [pve-conectividad.txt](../evidencias/virtualbox/pve-conectividad.txt): ping al gateway, DNS y primer `apt update` con error 401 en los repositorios enterprise.
+- [pve-apt-update.txt](../evidencias/virtualbox/pve-apt-update.txt): `apt update` sin errores con el No-Subscription. Quedan 213 paquetes por actualizar.
+- [pve-almacenamiento.txt](../evidencias/virtualbox/pve-almacenamiento.txt): `local`, `local-lvm` y `backup-lab` activos y el reparto del disco.
+- [pve-mejoras.txt](../evidencias/virtualbox/pve-mejoras.txt): drivers virtio, `promiscuity 1` en `nic0` y 3,8 GiB de RAM en el nodo.
+- [vbox-vminfo.txt](../evidencias/virtualbox/vbox-vminfo.txt): VT-x anidado, paravirtualización KVM, virtio-scsi y las dos NIC virtio con promiscuo `allow-all`.
+- [vbox-disco-fijo.txt](../evidencias/virtualbox/vbox-disco-fijo.txt): disco `fixed default` de 70 GB.
+- Capturas: creación de la VM, instalador, panel, Network, Storage, repositorios, usuarios y firewall (enlazadas arriba).
 
 ## Incidencias
 - Secure Boot no dejaba cargar los módulos de VirtualBox. Lo solucioné firmándolos con una clave MOK.
@@ -444,7 +503,7 @@ Sigo usando solo `root@pam` y el firewall de Proxmox desactivado y sin reglas, p
 - Puse 6 GB de RAM a la VM y la bajé a 4 GB, porque el portátil solo tiene 7,6 GiB.
 - En el instalador escribí `pve.pico.local` y el hostname quedaba `pve`. Lo vi en el resumen y lo corregí a `pve-pico.local` antes de instalar.
 - Los adaptadores estaban al revés (NAT en el 1) y el host-only acabó como "Red interna". Lo corregí antes de arrancar comparando con el resumen de la VM.
-- Con el modo "NAT" simple el gateway 10.0.2.2 no respondía ni al ARP (`10.0.2.2 FAILED`), ni con la IP 10.0.2.15 que da su DHCP. Lo cambié a "Red NAT" (`NatNetwork`), que funciona como un router y acepta IPs fijas. El gateway pasó a ser 10.0.2.1, como en el diseño original.
+- Con el modo "NAT" simple el gateway 10.0.2.2 no respondía ni al ARP (`10.0.2.2 FAILED`), ni con la IP 10.0.2.15 que da su DHCP. Lo cambié a "Red NAT" (`NatNetwork`), que funciona como un router y acepta IPs fijas ([nat-simple-error.txt](../evidencias/virtualbox/nat-simple-error.txt)). El gateway pasó a ser 10.0.2.1, como en el diseño original.
 - La regla MASQUERADE salía duplicada después de varios `ifreload -a`. Ahora solo se añade si no existe.
 - Aunque marqué "Reservar completamente", el disco quedó dinámico. Con la VM apagada lo convertí con `VBoxManage clonemedium ... --variant Fixed` y conecté el disco nuevo.
 - Los repositorios enterprise daban error 401. Los cambié por el No-Subscription.

@@ -1,0 +1,26 @@
+# Prueba con el modo "NAT" simple de VirtualBox (antes de cambiar a Red NAT)
+# vmbr1 con 10.0.2.100/24 y gateway 10.0.2.2
+
+$ ssh root@192.168.20.10 'ping -c3 10.0.2.2'
+PING 10.0.2.2 (10.0.2.2) 56(84) bytes of data.
+From 10.0.2.100 icmp_seq=1 Destination Host Unreachable
+From 10.0.2.100 icmp_seq=2 Destination Host Unreachable
+From 10.0.2.100 icmp_seq=3 Destination Host Unreachable
+
+--- 10.0.2.2 ping statistics ---
+3 packets transmitted, 0 received, +3 errors, 100% packet loss, time 2292ms
+
+# Prueba añadiendo la IP 10.0.2.15 (la que da el DHCP del NAT simple)
+$ ssh root@192.168.20.10 'ip neigh show dev vmbr1; ip addr add 10.0.2.15/24 dev vmbr1; ping -c3 -I 10.0.2.15 10.0.2.2; ip addr del 10.0.2.15/24 dev vmbr1'
+10.0.2.3 INCOMPLETE
+10.0.2.2 FAILED
+
+PING 10.0.2.2 (10.0.2.2) from 10.0.2.15 : 56(84) bytes of data.
+From 10.0.2.100 icmp_seq=1 Destination Host Unreachable
+From 10.0.2.100 icmp_seq=2 Destination Host Unreachable
+From 10.0.2.100 icmp_seq=3 Destination Host Unreachable
+
+--- 10.0.2.2 ping statistics ---
+3 packets transmitted, 0 received, +3 errors, 100% packet loss, time 2094ms
+
+# Solución: adaptador 2 en "Red NAT" (NatNetwork) y gateway 10.0.2.1 -> ver pve-conectividad.txt
