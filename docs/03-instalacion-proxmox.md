@@ -1,5 +1,9 @@
 # 03-instalacion-proxmox
 
+Este documento tiene tres partes: [Fase 3 (macOS, UTM)](#fase-3-macos-utm), [Fase 4 (macOS, UTM)](#fase-4-macos-utm-configuración-base-del-nodo) y [Fases 3 y 4 (Debian, VirtualBox)](#fases-3-y-4-debian-virtualbox).
+
+# Fase 3 (macOS, UTM)
+
 ## Objetivo
 En esta fase instalo Proxmox VE 9.2 para ARM64 en una VM de UTM, siguiendo el diseño de red del [02](02-diagrama-red.md). Al terminar quiero poder entrar al panel web desde el navegador de mi Mac.
 
@@ -65,7 +69,7 @@ En la pantalla de red del instalador he elegido la tarjeta de la red host-only c
 
 El instalador obliga a poner un gateway, pero la red host-only no tiene salida a Internet. Puse 192.168.20.1 (el Mac en la red host-only) solo para poder seguir. El gateway real, por la red compartida, lo configuraré en la fase de red.
 
-> En la fase 4 cambié el hostname a `pve-pico`, la IP a 192.168.20.10 y puse el gateway real (10.0.2.1). Está en la [fase 4](#fase-4-configuración-base-del-nodo).
+> En la fase 4 cambié el hostname a `pve-pico`, la IP a 192.168.20.10 y puse el gateway real (10.0.2.1). Está en la [fase 4](#fase-4-macos-utm-configuración-base-del-nodo).
 
 ![Red en el instalador](../evidencias/capturas-o-salidas/management_interface.png)
 
@@ -131,7 +135,7 @@ Proxmox queda instalado en una VM de UTM y accesible desde el Mac en `https://19
 
 ---
 
-# Fase 4: configuración base del nodo
+# Fase 4 (macOS, UTM): configuración base del nodo
 
 ## Objetivo
 En esta fase dejo el nodo preparado antes de crear las máquinas. Reviso los almacenamientos, configuro la red como en el [diseño](02-diagrama-red.md), miro qué cuentas pueden administrar el nodo y actualizo el reparto de recursos. También aplico en UTM las mejoras que pidió el profesor.
@@ -330,7 +334,7 @@ El nodo ya está listo para crear las máquinas. Entro al panel desde el Mac en 
 
 Para la siguiente fase me queda actualizar los 158 paquetes, descargar una plantilla LXC ARM64 y preparar la plantilla Linux. En la fase 5 también comprobaré que el NAT funciona desde los contenedores.
 
-# Migración a VirtualBox (Debian)
+# Fases 3 y 4 (Debian, VirtualBox)
 
 ## Objetivo
 Repetir las fases 3 y 4 en mi portátil con Debian y VirtualBox, que es lo que pedía el enunciado, y quitar la limitación del Mac: sin KVM los invitados solo podían ser LXC. Lo hecho en UTM se queda arriba como historial y en la etiqueta `utm-macos-fase4` del repositorio.
