@@ -52,6 +52,16 @@ Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi p
 | `cli-linux` | `srv-aso` | ___ | Servicio ASO |
 | Invitados | Internet (a través de Proxmox) | 80, 443/TCP y 53/UDP | Actualizaciones y DNS |
 
+### Red de laboratorio y aislamiento
+No uso VLAN. La red del laboratorio es la host-only 192.168.20.0/24 (`vboxnet0`), que solo existe entre mi portátil y la VM de Proxmox, así que ya está separada de la red de casa y de la del instituto.
+
+Medidas de aislamiento y permisos:
+- Al panel (8006) y al SSH (22) del nodo solo se puede entrar desde la red host-only, o sea, desde mi portátil.
+- `srv-aso` y `cli-linux` están en esa misma red y salen a Internet solo pasando por el nodo, que hace NAT hacia `vmbr1`. Desde fuera nadie puede llegar a ellos.
+- La Red NAT de VirtualBox también es NAT, así que desde Internet no se puede entrar a la VM.
+- Las pruebas del cliente al servidor solo las hago entre mis dos máquinas y al puerto del servicio ASO.
+- Para administrar uso solo `root@pam`, porque el laboratorio es solo mío, y las contraseñas no las subo al repositorio.
+
 ## Diagrama de Red
 
 ```mermaid
@@ -83,6 +93,8 @@ En este apartado no he usado ningún comando, realizaré las configuraciones en 
 - [Red compartida en UTM](../evidencias/capturas-o-salidas/red_compartida_utm.png): adaptador de red compartida de la VM, con la red NAT 10.0.2.0/24.
 
 ## Incidencias
+
+El primer diseño era para UTM en el Mac. Al pasarme a VirtualBox tuve que cambiar la red NAT: el modo "NAT" normal no funcionaba con el bridge de Proxmox y usé la "Red NAT" (`NatNetwork`), que tiene el gateway en 10.0.2.1, igual que tenía en el diseño. Lo explico en la [instalación](03-instalacion-proxmox.md#fases-3-y-4-debian-virtualbox).
 
 ## Conclusion
 Este apartado me permite seguir con los siguientes pasos, este paso es esencial para tener claro más adelante cómo voy a realizar las configuraciones de los adaptadores durante la instalación y después de la instalación. De momento he configurado dos adaptadores, uno con host only que nos sirve para gestionar y otro que hace NAT para la salida de las VMs a Internet.
