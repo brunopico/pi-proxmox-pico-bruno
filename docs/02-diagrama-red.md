@@ -4,7 +4,7 @@
 En esta fase del proyecto voy a decidir qué redes va a usar la VM de Proxmox, en mi caso uso VirtualBox en Debian para virtualizarla (antes UTM en el Mac), debo de decidir qué redes configuro y qué IP tiene la máquina. La idea es poder gestionar Proxmox desde mi portátil y que Proxmox y las máquinas invitadas tengan salida a la red.
 
 ## Procedimiento
-Para este laboratorio necesito que Proxmox esté conectado a dos redes, la primera es la red 'host only'. Host only la he configurado con la red 192.168.20.0/24, esta red la usaré para conectarme a Proxmox vía HTTPS por el puerto TCP:8006. La segunda es una red NAT. En VirtualBox uso la 'Red NAT' (`NatNetwork`) con la red 10.0.2.0/24 y no el modo 'NAT' simple, porque el NAT simple no respondía detrás del bridge de Proxmox (está explicado en la [instalación](03-instalacion-proxmox.md#fases-3-y-4-debian-virtualbox)). En UTM esta red se llamaba 'red compartida'.
+Para este laboratorio necesito que Proxmox esté conectado a dos redes, la primera es la red 'host only'. Host only la he configurado con la red 192.168.20.0/24, esta red la usaré para conectarme a Proxmox vía HTTPS por el puerto TCP:8006. La segunda es una red NAT. En VirtualBox uso la 'Red NAT' (`NatNetwork`) con la red 10.0.2.0/24 y no el 'NAT' normal, porque con el normal Proxmox no conseguía salir por el bridge (lo cuento en la [instalación](03-instalacion-proxmox.md#fases-3-y-4-debian-virtualbox)). En UTM a esta red la llamaban 'red compartida'.
 
 ### Configuración de la VM
 En estas capturas muestro el estado de la configuración de las interfaces de la VM.
@@ -40,7 +40,7 @@ Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi p
 | Red / equipo | Gateway | DNS | Comentario |
 |---|---|---|---|
 | `pve-pico` en host-only 192.168.20.0/24 | Sin gateway | No aplica | Solo se usa para gestionar Proxmox desde el portátil |
-| `pve-pico` en Red NAT 10.0.2.0/24 | 10.0.2.1 | 10.0.2.1, 1.1.1.1 | 10.0.2.1 es el router de la Red NAT de VirtualBox, que reenvía las consultas al DNS del portátil |
+| `pve-pico` en Red NAT 10.0.2.0/24 | 10.0.2.1 | 10.0.2.1, 1.1.1.1 | 10.0.2.1 es el router de la Red NAT de VirtualBox, que pasa las consultas al DNS del portátil |
 | `srv-aso` y `cli-linux` (192.168.20.0/24) | 192.168.20.10 | 10.0.2.1, 1.1.1.1 | Salen a Internet a través de Proxmox, que hace NAT hacia la red compartida |
 
 ### Puertos necesarios

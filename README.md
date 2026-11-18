@@ -6,11 +6,11 @@ URL GitHub: https://github.com/brunopico/pi-proxmox-pico-bruno.git
 
 ## Objetivo
 
-Disponer de un laboratorio de virtualización propio, reproducible y documentado, donde practicar la administración de servicios de ASO sin depender del Proxmox del centro. El laboratorio será un único nodo Proxmox VE con dos invitados: un servidor de servicio (`srv-aso`) y un cliente Linux (`cli-linux`) desde el que se comprueba el servicio. El trabajo incluye automatización con Bash y Ansible, y copias de seguridad con su restauración probada. Al principio monté el nodo en mi Mac con UTM, pero ahora lo tengo en mi portátil con Debian y VirtualBox. Aquí sí hay virtualización anidada (KVM), así que `srv-aso` será una VM y `cli-linux` un contenedor LXC.
+Disponer de un laboratorio de virtualización propio, reproducible y documentado, donde practicar la administración de servicios de ASO sin depender del Proxmox del centro. El laboratorio será un único nodo Proxmox VE con dos invitados: un servidor de servicio (`srv-aso`) y un cliente Linux (`cli-linux`) desde el que se comprueba el servicio. El trabajo incluye automatización con Bash y Ansible, y copias de seguridad con su restauración probada. Empecé montando el nodo en mi Mac con UTM, pero ahora lo tengo en mi portátil con Debian y VirtualBox. Aquí sí tengo virtualización anidada (KVM), así que `srv-aso` va a ser una VM y `cli-linux` un contenedor LXC.
 
 ## Modalidad
 
-Virtualizada (VirtualBox). Proxmox VE 9.2 amd64 va en una VM de VirtualBox en mi portátil con Debian 13 (Intel i5-10210U). Hasta la fase 4 lo hice en el Mac con UTM y Proxmox ARM64; ese estado está guardado en la etiqueta `utm-macos-fase4` y el cambio está explicado en la [bitácora](docs/00-bitacora.md).
+Virtualizada (VirtualBox). Proxmox VE 9.2 amd64 va en una VM de VirtualBox en mi portátil con Debian 13 (Intel i5-10210U). Hasta la fase 4 lo tenía en el Mac con UTM y Proxmox ARM64. Eso lo he dejado guardado en la etiqueta `utm-macos-fase4` y el cambio lo explico en la [bitácora](docs/00-bitacora.md).
 
 ## Indice de documentacion
 
