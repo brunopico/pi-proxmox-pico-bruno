@@ -64,7 +64,7 @@ las evidencias utiles; evita frases generales como "he trabajado en Proxmox".
 - Incidencias y solucion o estado pendiente: Con el disco en SCSI la VM no arrancaba porque no veía el disco. Volví a VirtIO y el profesor me dijo que vale. Los repositorios enterprise daban error 401 y los cambié por el No-Subscription. El ping a Internet no responde porque el centro lo bloquea por sus políticas, pero `apt update` descarga bien.
 - Siguiente paso: Actualizar los paquetes, descargar una plantilla LXC ARM64 y preparar la plantilla Linux.
 
-## Sesion 07 - 14-11-2026
+## Sesion 07 - 17-11-2026
 
 - Objetivo: pasar el laboratorio a mi portátil con Debian y VirtualBox, que es lo que quería el profesor, y volver a hacer las fases 3 y 4 (docs/03-instalacion-proxmox.md).
 - Acciones realizadas: Primero guardé cómo estaba todo en el Mac con la etiqueta `utm-macos-fase4` y me hice la rama `virtualbox-debian` para no machacar nada. Instalé VirtualBox, creé la red host-only `vboxnet0` y la VM `pve-pico` (3 vCPU, 4 GB, 70 GB, EFI, virtio-scsi, virtio-net y VT-x anidado) e instalé Proxmox VE 9.2 amd64. Después configuré `vmbr0` y `vmbr1` con NAT, puse el repositorio No-Subscription, creé `backup-lab` e hice las cinco mejoras de la VM.
