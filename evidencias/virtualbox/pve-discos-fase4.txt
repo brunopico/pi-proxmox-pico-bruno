@@ -1,0 +1,59 @@
+### lsblk
+NAME                SIZE TYPE FSTYPE      MOUNTPOINTS
+sda                  70G disk             
+├─sda1             1007K part             
+├─sda2              512M part vfat        /boot/efi
+└─sda3             69.5G part LVM2_member 
+  ├─pve-swap          4G lvm  swap        [SWAP]
+  ├─pve-root       28.4G lvm  ext4        /
+  ├─pve-data_tmeta    1G lvm              
+  │ └─pve-data     26.5G lvm              
+  └─pve-data_tdata 26.5G lvm              
+    └─pve-data     26.5G lvm              
+sr0                 1.6G rom  iso9660     
+
+### findmnt /
+TARGET SOURCE               FSTYPE OPTIONS
+/      /dev/mapper/pve-root ext4   rw,relatime,errors=remount-ro
+
+### pvs
+  PV         VG  Fmt  Attr PSize   PFree 
+  /dev/sda3  pve lvm2 a--  <69.50g <8.63g
+
+### vgs
+  VG  #PV #LV #SN Attr   VSize   VFree 
+  pve   1   3   0 wz--n- <69.50g <8.63g
+
+### lvs
+  LV   VG  LSize   Type      Data%  Meta% 
+  data pve <26.50g thin-pool 0.00   1.58  
+  root pve  28.37g linear                 
+  swap pve   4.00g linear                 
+
+### pvesm status
+Name              Type     Status     Total (KiB)      Used (KiB) Available (KiB)        %
+backup-lab         dir     active        29106188         5674680        21927664   19.50%
+local              dir     active        29106188         5674680        21927664   19.50%
+local-lvm      lvmthin     active        27783168               0        27783168    0.00%
+
+### storage.cfg
+dir: local
+	path /var/lib/vz
+	content backup,import,vztmpl,iso
+
+lvmthin: local-lvm
+	thinpool data
+	vgname pve
+	content images,rootdir
+
+dir: backup-lab
+	path /srv/backup-lab
+	content backup
+	nodes pve-pico
+
+
+### backup-lab
+TARGET SOURCE               FSTYPE OPTIONS
+/      /dev/mapper/pve-root ext4   rw,relatime,errors=remount-ro
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mapper/pve-root   28G  5.5G   21G  21% /

@@ -76,12 +76,22 @@ las evidencias utiles; evita frases generales como "he trabajado en Proxmox".
 
 ## Sesion 08 - 23-11-2026 (en casa)
 
-- Objetivo: hacer lo que me dijo el profesor en la nota de seguimiento de la fase 4: actualizar el nodo, rellenar la memoria y ajustar el margen de memoria.
-- Acciones realizadas: Actualicé el nodo con `apt full-upgrade` (225 paquetes) y lo reinicié porque venía un kernel nuevo. Rellené en la memoria el resumen, la necesidad, los objetivos, el alcance con sus criterios de aceptación, la modalidad, la red, la instalación y el presupuesto. Cambié el reparto de RAM para usar los 3,8 GiB que ve el nodo.
-- Decisiones y motivos: El servicio ASO todavía no lo elijo. Lo dejo para la fase 7 y en la memoria explico cómo lo voy a elegir. Al calcular la RAM uso lo medido (3,8 GiB) y no los 4 GB que le puse a la VM.
+- Objetivo: hacer lo que me dijo el profesor en la nota de seguimiento de la fase 4: actualizar el nodo y ajustar el margen de memoria.
+- Acciones realizadas: Actualicé el nodo con `apt full-upgrade` (225 paquetes) y lo reinicié porque venía un kernel nuevo. Cambié el reparto de RAM para usar los 3,8 GiB que ve el nodo. También empecé a rellenar la memoria técnica, pero el profesor nos dijo luego que todavía no había que rellenarla, así que la he dejado como estaba.
+- Decisiones y motivos: El servicio ASO todavía no lo elijo. Lo dejo para la fase 7 y en la ficha explico cómo lo voy a elegir. Al calcular la RAM uso lo medido (3,8 GiB) y no los 4 GB que le puse a la VM.
 - Pruebas y resultados: La actualización terminó sin errores. Después de reiniciar, `pveversion` da 9.2.32 con el kernel 7.0.14-30, la red y los almacenamientos siguen igual, `/dev/kvm` sigue existiendo y no queda ningún paquete por actualizar. El margen de RAM queda en 0,8 GiB.
-- Documentos o evidencias: [Memoria](10-memoria-tecnica.md); [actualización del nodo](03-instalacion-proxmox.md#9-actualización-del-nodo); pve-upgrade.txt y pve-tras-upgrade.txt en evidencias/virtualbox/.
+- Documentos o evidencias: [actualización del nodo](03-instalacion-proxmox.md#9-actualización-del-nodo); pve-upgrade.txt y pve-tras-upgrade.txt en evidencias/virtualbox/.
 - Incidencias y solucion o estado pendiente: Ninguna en la actualización. Me queda elegir el servicio ASO y poner su puerto.
+- Siguiente paso: Completar lo que el profesor ha añadido a la fase 4 y luego empezar la fase 5.
+
+## Sesion 09 - 24-11-2026
+
+- Objetivo: completar lo que el profesor ha añadido a la fase 4 (discos, almacenamientos, cuentas y la prueba de acceso limitado) y quitar lo de la memoria técnica, que no había que rellenar todavía.
+- Acciones realizadas: He dejado la memoria técnica como estaba al principio. He sacado los discos y el LVM con `lsblk`, `findmnt /`, `pvs`, `vgs` y `lvs`, he hecho la tabla de discos y la de almacenamientos con su backend y el disco que los sostiene, y he limitado `backup-lab` a mi nodo. He probado la ventana de subir una ISO. He creado la cuenta `alumno-lectura@pve` y el rol `AulaLectura` (solo `Sys.Audit`), lo he asignado en `/nodes/pve-pico` sin propagar, he hecho las pruebas y luego he quitado el permiso. También he borrado la cuenta `bruno@pve`, que creé en clase para una prueba y ya no usaba.
+- Decisiones y motivos: Para copias sigo con `backup-lab`, que ya existía y coincide con el diseño, en vez de crear otro. Las pruebas de la cuenta las hago en una ventana privada y no con root, porque con root se puede todo y no se demuestra nada. La cuenta y el rol los dejo creados pero sin permisos hasta que el profesor diga que ya no se usan.
+- Pruebas y resultados: Sin rol la cuenta no veía el estado del nodo. Con el rol veía el resumen y el `status`, pero el `syslog` daba 403 por falta de `Sys.Syslog`. Después de quitar el permiso el `status` volvió a dar 403. En `lvs` el thin pool está al 0 % de datos y al 1,58 % de metadatos.
+- Documentos o evidencias: [Fase 4 en VirtualBox](03-instalacion-proxmox.md#6-repositorios-y-almacenamiento); pve-discos-fase4.txt, pve-cuenta-lectura.txt y las capturas de discos, ISO, permisos y acceso en evidencias/virtualbox/.
+- Incidencias y solucion o estado pendiente: La primera vez la cuenta no podía ver nada ni con el rol. Con `pveum acl list` vi que la asignación no se había creado. La volví a hacer con `pveum acl modify` y ya funcionó. También hice unas pruebas sin darme cuenta en la ventana normal, que tenía la sesión de root, y el `syslog` sí se leía. Las repetí en la ventana privada con la cuenta limitada.
 - Siguiente paso: Empezar la fase 5: bajar las plantillas y preparar la plantilla Linux.
 
 Anadir una entrada con esta estructura en cada sesion. El historial de

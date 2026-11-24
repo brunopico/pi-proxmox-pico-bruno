@@ -406,15 +406,41 @@ De DNS he dejado 10.0.2.1 y 1.1.1.1. El ping al gateway va bien y `deb.debian.or
 ### 6. Repositorios y almacenamiento
 Igual que me pasó en el Mac, los repositorios enterprise daban error 401 porque son de pago. Los desactivé y puse el No-Subscription, que es el gratuito. Ahora `apt update` va sin errores y me salen 213 paquetes para actualizar ([pve-apt-update.txt](../evidencias/virtualbox/pve-apt-update.txt)).
 
-También he creado `backup-lab` en `/srv/backup-lab`, que solo sirve para guardar copias ([pve-almacenamiento.txt](../evidencias/virtualbox/pve-almacenamiento.txt)):
+**Discos:** en el nodo solo hay un disco, `/dev/sda`, que es el VDI `pve-pico-fijo.vdi` de VirtualBox. Lo he mirado en Nodo → Discos y con `lsblk`, `findmnt /`, `pvs`, `vgs` y `lvs` ([pve-discos-fase4.txt](../evidencias/virtualbox/pve-discos-fase4.txt)). No he borrado ni tocado ninguna partición.
 
-| Almacenamiento | Tipo | Qué admite | Total | Libre | Para qué lo uso |
-|---|---|---|---|---|---|
-| `local` | Directorio (`/var/lib/vz`) | Backup, Import, ISO y plantillas de contenedor | 27,8 GiB | 22,2 GiB | Plantillas LXC e ISOs |
-| `local-lvm` | LVM-Thin | Discos de VM y contenedores | 26,5 GiB | 26,5 GiB | Discos de `srv-aso` y `cli-linux` |
-| `backup-lab` | Directorio (`/srv/backup-lab`) | Solo backups | 27,8 GiB (el mismo que `local`) | 22,2 GiB | Copias de la fase 9 |
+| Dispositivo | Tamaño | Particiones o volúmenes | Uso | VDI |
+|---|---|---|---|---|
+| `/dev/sda` | 70 GiB (en el panel salen 75,16 GB porque cuenta en GB) | `sda1`, `sda2` y `sda3` | Disco entero del nodo | `pve-pico-fijo.vdi` |
+| `/dev/sda1` | 1007 KiB | — | Arranque BIOS (lo crea el instalador) | `pve-pico-fijo.vdi` |
+| `/dev/sda2` | 512 MiB, vfat | — | Arranque EFI, montada en `/boot/efi` | `pve-pico-fijo.vdi` |
+| `/dev/sda3` | 69,5 GiB, LVM | Grupo `pve`: `root`, `swap` y `data`, con 8,63 GiB libres | Todo lo demás | `pve-pico-fijo.vdi` |
+| `pve/root` | 28,4 GiB, ext4 | — | Sistema, montado en `/` (`findmnt /`). Aquí están `local` y `backup-lab` | `pve-pico-fijo.vdi` |
+| `pve/swap` | 4 GiB | — | Swap | `pve-pico-fijo.vdi` |
+| `pve/data` | 26,5 GiB, thin pool | — | `local-lvm`, para los discos de los invitados | `pve-pico-fijo.vdi` |
 
-La swap es de 4 GB y en el grupo `pve` quedan 8,63 GB libres. En `local-lvm` solo se pueden guardar discos, por eso las copias van a `backup-lab`.
+En `lvs`, el thin pool `data` tiene `Data%` 0,00 y `Meta%` 1,58. Esto no es el espacio libre: `Data%` es cuánto del pool ocupan los datos de los discos (ahora nada, porque no hay invitados) y `Meta%` es lo que ocupan los metadatos, o sea, la información que usa el pool para saber dónde está cada bloque. Si alguno de los dos llegara al 100 %, el pool se llenaría aunque pareciera que hay sitio.
+
+![Nodo > Discos](../evidencias/virtualbox/discos_fase4.png)
+
+**Almacenamientos:** también he creado `backup-lab` en `/srv/backup-lab`, que solo sirve para guardar copias. Lo he comprobado en Datacenter → Storage y en `/etc/pve/storage.cfg` ([pve-discos-fase4.txt](../evidencias/virtualbox/pve-discos-fase4.txt), [pve-almacenamiento.txt](../evidencias/virtualbox/pve-almacenamiento.txt)):
+
+| Almacenamiento | Backend | Ruta o pool real | Disco que lo sostiene | Contenido habilitado | Libre | Para qué lo uso |
+|---|---|---|---|---|---|---|
+| `local` | Directorio | `/var/lib/vz` | `pve/root` en `/dev/sda3` | Backup, Import, ISO y plantillas de contenedor | 20,9 GiB | Plantillas LXC e ISOs |
+| `local-lvm` | LVM-Thin | Pool `data` del grupo `pve` | `pve/data` en `/dev/sda3` | Discos de VM y contenedores | 26,5 GiB | Discos de `srv-aso` y `cli-linux` |
+| `backup-lab` | Directorio | `/srv/backup-lab` | `pve/root` en `/dev/sda3` (el mismo que `local`) | Solo backups (VZDump) | 20,9 GiB (compartido con `local`) | Copias de la fase 9 |
+
+Aunque `local` y `backup-lab` son dos entradas, están en el mismo volumen (`pve/root`), así que comparten el espacio libre: lo que ocupe uno se lo quita al otro. Y los tres están en el mismo disco.
+
+En `local` he abierto la opción de subir una ISO para ver que se puede (no la he vuelto a subir). En `local-lvm` no sale, porque no admite ISOs.
+
+![Subir ISO en local](../evidencias/virtualbox/subir_iso_fase4.png)
+
+**¿Por qué un pool LVM-thin no sirve para guardar una ISO?** Porque un pool LVM-thin no es una carpeta con un sistema de archivos donde se puedan dejar archivos. Lo que guarda son volúmenes, que son como discos virtuales enteros para las VMs y los contenedores. Una ISO es un archivo, y para guardarla hace falta un almacenamiento de tipo directorio, como `local`, que sí tiene una carpeta (`/var/lib/vz/template/iso`). Por eso Proxmox solo deja poner en `local-lvm` discos de VM y contenedores.
+
+**Destino de copias:** `backup-lab` ya existía de antes y coincide con el diseño, así que lo uso y no creo otro. Con `findmnt -T /srv/backup-lab` se ve que la carpeta está en `/dev/mapper/pve-root`, el volumen del sistema, y `df -h` muestra 21 GiB libres. La carpeta solo la usa `backup-lab`. Lo he dejado limitado a mi nodo (`nodes pve-pico` en `storage.cfg`) y sin marcar como compartido, y en `pvesm status` sale activo.
+
+La swap es de 4 GB y en el grupo `pve` quedan 8,63 GB libres.
 
 El problema que veo es que `backup-lab` está dentro del disco de la VM (`pve-pico-fijo.vdi`), y ese archivo está en el mismo NVMe que Debian, que tiene 868 GB libres ([host-df.txt](../evidencias/virtualbox/host-df.txt)). O sea, si se rompe el NVMe o se estropea el VDI, pierdo el laboratorio y las copias de golpe. En la fase 9 sacaré una copia fuera de la VM.
 
@@ -434,19 +460,43 @@ En el Mac solo pude hacer tres de las cinco mejoras que pidió el profesor. Aqu�
 
 ### 8. Accesos y recursos
 
-| Cuenta | Realm | Permisos | Para qué la uso |
-|---|---|---|---|
-| `root` | Linux PAM | Administrador de todo | Es la única: panel, consola y SSH |
+He revisado en Datacenter → Permisos las cuentas, los permisos, los grupos y si había algo heredado ([pve-cuenta-lectura.txt](../evidencias/virtualbox/pve-cuenta-lectura.txt)). No hay grupos, y antes del ejercicio la tabla de permisos estaba vacía, así que no hay nada heredado.
 
-Como el laboratorio solo lo uso yo, con `root@pam` me vale. Si fuera una empresa crearía otro usuario con el rol `PVEVMAdmin`, que puede manejar las máquinas pero no tocar el nodo. Para no tener que poner la contraseña en cada comando copié mi clave pública al nodo con `ssh-copy-id`. Las contraseñas y las claves no salen en ninguna captura ni en el repositorio.
+| Cuenta | Dónde se usa | Rol o permisos | Ámbito | Para qué |
+|---|---|---|---|---|
+| `root@pam` | Panel, consola y SSH | Administrador de todo (es root, no necesita rol) | Todo (`/`) | Administrar el laboratorio. No es una cuenta limitada |
+| `alumno-lectura@pve` | Solo en el panel, para la prueba | `AulaLectura` (solo `Sys.Audit`) mientras duró la prueba. Ahora ninguno | `/nodes/pve-pico`, sin propagar | Probar una cuenta de solo lectura |
+
+Para administrar uso solo `root@pam`, porque el laboratorio solo lo uso yo, y es una cuenta que lo puede hacer todo. Si fuera una empresa crearía otro usuario con el rol `PVEVMAdmin`, que puede manejar las máquinas pero no tocar el nodo. En clase creé además una cuenta `bruno@pve` para una prueba. Como no tenía permisos y ya no la usaba, la borré.
+
+![Permisos](../evidencias/virtualbox/permisos_fase4.png) Para no tener que poner la contraseña en cada comando copié mi clave pública al nodo con `ssh-copy-id`. Las contraseñas y las claves no salen en ninguna captura ni en el repositorio.
 
 El firewall de Proxmox lo dejo desactivado y sin reglas porque no es obligatorio. Aun así el laboratorio está bastante aislado:
 - Al panel y al SSH solo se puede entrar por `vboxnet0`, que es una red host-only que solo existe entre mi portátil y la VM.
 - Los invitados solo salen a Internet pasando por el nodo, con NAT.
 - La Red NAT de VirtualBox también hace NAT, así que desde fuera nadie puede entrar a la VM.
 
-![Usuarios](../evidencias/virtualbox/usuarios_fase4.png)
+![Usuarios](../evidencias/virtualbox/usuarios_fase4b.png)
 ![Firewall](../evidencias/virtualbox/firewall_fase4.png)
+
+**Prueba de acceso limitado:** para ver cómo funcionan los permisos he creado la cuenta `alumno-lectura@pve` (realm Proxmox VE) y el rol `AulaLectura`, que solo tiene `Sys.Audit`. Lo asigné en `/nodes/pve-pico` sin propagar, y nunca en `/`. Las pruebas las hice entrando con esa cuenta en una ventana privada, no con la sesión de root, porque con root se puede todo y no demuestra nada.
+
+| Cuenta y situación | Prueba | Resultado previsto | Resultado obtenido | Explicación |
+|---|---|---|---|---|
+| `alumno-lectura@pve` sin rol | Abrir `/api2/json/nodes/pve-pico/status` | Denegado | Denegado: `Permission check failed (/nodes/pve-pico, Sys.Audit)` | Sin rol no tiene ningún permiso |
+| Con `AulaLectura` en el nodo | Resumen del nodo en el panel | Se ve el estado | Se ve: CPU, RAM (1,54 de 3,80 GiB), disco, kernel y versión, con `alumno-lectura@pve` arriba a la derecha | `Sys.Audit` deja consultar el estado |
+| Con `AulaLectura` en el nodo | Abrir `.../nodes/pve-pico/status` | JSON con `uptime`, `cpu`, `memory` | Permitido: sale el JSON con `uptime`, `cpu`, `memory`, `rootfs`... | Es una consulta que solo pide `Sys.Audit` |
+| Con `AulaLectura` en el nodo | Abrir `.../nodes/pve-pico/syslog?limit=1` | Denegado con 403 | Denegado: HTTP 403 (en F12 → Red) y `Permission check failed (/nodes/pve-pico, Sys.Syslog)` | Leer el registro pide `Sys.Syslog`, y el rol no lo tiene |
+| Después de quitar el permiso | Abrir `.../nodes/pve-pico/status` | Denegado con 403 | Denegado: HTTP 403 (en F12 → Red) y `Permission check failed (/nodes/pve-pico, Sys.Audit)`. En `pveum user permissions` ya no sale ningún permiso | Ya no tiene el rol en el nodo, aunque la cuenta siga existiendo |
+
+Al principio la cuenta no podía ver el estado del nodo ni con el rol puesto. Lo miré con `pveum acl list` y vi que la asignación no se había llegado a crear. La volví a hacer con `pveum acl modify` y con `pveum user permissions` comprobé que ya tenía `Sys.Audit` en `/nodes/pve-pico`. La cuenta y el rol los dejo creados hasta que el profesor diga que ya no se usan, pero sin ningún permiso. En las capturas no sale ninguna contraseña.
+
+![Asignación del permiso](../evidencias/virtualbox/asignacion_permiso.png)
+![Sin rol](../evidencias/virtualbox/acceso_sin_rol.png)
+![Resumen con alumno-lectura](../evidencias/virtualbox/acceso_resumen.png)
+![status permitido](../evidencias/virtualbox/acceso_status_ok.png)
+![syslog denegado](../evidencias/virtualbox/acceso_syslog_403.png)
+![status después de quitar el permiso](../evidencias/virtualbox/acceso_retirado.png)
 
 | Elemento | CPU/vCPU | RAM | Disco | Por qué |
 |---|---|---|---|---|
@@ -462,6 +512,8 @@ El firewall de Proxmox lo dejo desactivado y sin reglas porque no es obligatorio
 - CPU: las 3 vCPU se las reparten el nodo y los dos invitados. Como no van a hacer mucho, van bien los tres a la vez.
 
 No le doy a la VM todo lo que tiene el portátil, le dejo 3,6 GiB y 5 hilos a Debian para poder seguir usándolo.
+
+Comparado con el presupuesto del [inventario](01-inventario-hardware.md) (que era para el ordenador de clase, con 7,6 GiB para Proxmox), ahora tengo bastante menos RAM para el laboratorio. Por eso he bajado lo de los invitados: `srv-aso` pasa de 2 GB a 1 GB y `cli-linux` de 1 GB a 512 MB. A cambio, ahora tengo KVM y un NVMe en vez de un disco mecánico.
 
 
 ### 9. Actualización del nodo
@@ -499,6 +551,17 @@ ls /sys/bus/virtio/drivers; lsblk; ip -d link show nic0; free -h
 apt update && apt full-upgrade -y
 reboot
 uptime; pveversion; uname -r; apt list --upgradable
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS; findmnt /; pvs; vgs
+lvs -o lv_name,vg_name,lv_size,segtype,data_percent,metadata_percent
+pvesm set backup-lab --nodes pve-pico; cat /etc/pve/storage.cfg
+findmnt -T /srv/backup-lab; df -h /srv/backup-lab
+pveum user add alumno-lectura@pve --comment "Cuenta de prueba de solo lectura"
+pveum passwd alumno-lectura@pve
+pveum role add AulaLectura --privs "Sys.Audit"
+pveum acl modify /nodes/pve-pico --users alumno-lectura@pve --roles AulaLectura --propagate 0
+pveum user permissions alumno-lectura@pve --path /nodes/pve-pico
+pveum acl delete /nodes/pve-pico --users alumno-lectura@pve --roles AulaLectura
+pveum user delete bruno@pve
 ```
 
 ## Evidencias
@@ -516,8 +579,11 @@ uptime; pveversion; uname -r; apt list --upgradable
 - [pve-tras-upgrade.txt](../evidencias/virtualbox/pve-tras-upgrade.txt): el nodo después de reiniciar, con la versión nueva, la red, los almacenamientos y KVM funcionando y 0 paquetes pendientes.
 - [pve-almacenamiento.txt](../evidencias/virtualbox/pve-almacenamiento.txt): `local`, `local-lvm` y `backup-lab` activos y cómo está repartido el disco.
 - [pve-mejoras.txt](../evidencias/virtualbox/pve-mejoras.txt): drivers virtio, `promiscuity 1` en `nic0` y 3,8 GiB de RAM en el nodo.
+- [pve-discos-fase4.txt](../evidencias/virtualbox/pve-discos-fase4.txt): el disco, las particiones, el LVM, los almacenamientos de `storage.cfg` y el destino de copias limitado a mi nodo.
+- [pve-cuenta-lectura.txt](../evidencias/virtualbox/pve-cuenta-lectura.txt): las cuentas, el rol, la asignación del permiso, los permisos efectivos, la retirada y el borrado de `bruno@pve`.
 - [vbox-vminfo.txt](../evidencias/virtualbox/vbox-vminfo.txt): VT-x anidado, KVM, virtio-scsi y las dos tarjetas virtio en modo promiscuo.
 - [vbox-disco-fijo.txt](../evidencias/virtualbox/vbox-disco-fijo.txt): disco fijo de 70 GB.
+- Capturas de la prueba de acceso: la asignación del permiso, la cuenta sin rol, el resumen y el `status` con el rol, el `syslog` denegado con 403 y el `status` denegado después de quitar el permiso.
 - Capturas: creación de la VM, instalador, panel, Network, Storage, repositorios, usuarios y firewall (están arriba).
 
 ## Incidencias
