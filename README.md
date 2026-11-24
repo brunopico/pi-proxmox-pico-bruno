@@ -31,7 +31,7 @@ Virtualizada (VirtualBox). Proxmox VE 9.2 amd64 va en una VM de VirtualBox en mi
 ## Estado
 
 - [x] GitHub creado y primer commit publicado
-- [ ] URL entregada y acceso docente comprobado
+- [x] URL entregada y acceso docente comprobado
 - [x] Modalidad indicada
 - [x] Inventario
 - [x] Diagrama de red

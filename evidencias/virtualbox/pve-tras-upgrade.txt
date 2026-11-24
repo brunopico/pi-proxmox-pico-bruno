@@ -1,0 +1,17 @@
+ 18:14:17 up 0 min,  1 user,  load average: 0.58, 0.18, 0.06
+pve-manager/9.2.32/60a22e26e411402f (running kernel: 7.0.14-30-pve)
+7.0.14-30-pve
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+nic0             UP             
+nic1             UP             
+vmbr0            UP             192.168.20.10/24 fe80::a00:27ff:fe4d:1cbe/64 
+vmbr1            UP             10.0.2.100/24 fe80::a00:27ff:fe28:b675/64 
+default via 10.0.2.1 dev vmbr1 proto kernel onlink 
+10.0.2.0/24 dev vmbr1 proto kernel scope link src 10.0.2.100 
+192.168.20.0/24 dev vmbr0 proto kernel scope link src 192.168.20.10 
+Name              Type     Status     Total (KiB)      Used (KiB) Available (KiB)        %
+backup-lab         dir     active        29106188         5664964        21937380   19.46%
+local              dir     active        29106188         5664964        21937380   19.46%
+local-lvm      lvmthin     active        27783168               0        27783168    0.00%
+crw-rw---- 1 root kvm 10, 232 Nov 23 18:13 /dev/kvm
+0

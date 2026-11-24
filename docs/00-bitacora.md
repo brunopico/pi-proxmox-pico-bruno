@@ -74,6 +74,16 @@ las evidencias utiles; evita frases generales como "he trabajado en Proxmox".
 - Incidencias y solucion o estado pendiente: Bastantes: Secure Boot (lo arreglé firmando con MOK), VT-x anidado en gris (`VBoxManage`), me equivoqué con el hostname en el instalador, puse los adaptadores al revés, el NAT normal no iba (cambié a Red NAT), la regla MASQUERADE salía repetida y el disco se creó dinámico (`clonemedium`). Lo explico todo en el documento.
 - Siguiente paso: Actualizar los 213 paquetes, bajar las plantillas y crear `srv-aso` y `cli-linux`.
 
+## Sesion 08 - 23-11-2026 (en casa)
+
+- Objetivo: hacer lo que me dijo el profesor en la nota de seguimiento de la fase 4: actualizar el nodo, rellenar la memoria y ajustar el margen de memoria.
+- Acciones realizadas: Actualicé el nodo con `apt full-upgrade` (225 paquetes) y lo reinicié porque venía un kernel nuevo. Rellené en la memoria el resumen, la necesidad, los objetivos, el alcance con sus criterios de aceptación, la modalidad, la red, la instalación y el presupuesto. Cambié el reparto de RAM para usar los 3,8 GiB que ve el nodo.
+- Decisiones y motivos: El servicio ASO todavía no lo elijo. Lo dejo para la fase 7 y en la memoria explico cómo lo voy a elegir. Al calcular la RAM uso lo medido (3,8 GiB) y no los 4 GB que le puse a la VM.
+- Pruebas y resultados: La actualización terminó sin errores. Después de reiniciar, `pveversion` da 9.2.32 con el kernel 7.0.14-30, la red y los almacenamientos siguen igual, `/dev/kvm` sigue existiendo y no queda ningún paquete por actualizar. El margen de RAM queda en 0,8 GiB.
+- Documentos o evidencias: [Memoria](10-memoria-tecnica.md); [actualización del nodo](03-instalacion-proxmox.md#9-actualización-del-nodo); pve-upgrade.txt y pve-tras-upgrade.txt en evidencias/virtualbox/.
+- Incidencias y solucion o estado pendiente: Ninguna en la actualización. Me queda elegir el servicio ASO y poner su puerto.
+- Siguiente paso: Empezar la fase 5: bajar las plantillas y preparar la plantilla Linux.
+
 Anadir una entrada con esta estructura en cada sesion. El historial de
 GitHub registra los commits; no hace falta incluir el hash del propio
 commit dentro de su entrada de bitacora.

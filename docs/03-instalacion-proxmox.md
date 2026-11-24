@@ -455,13 +455,24 @@ El firewall de Proxmox lo dejo desactivado y sin reglas porque no es obligatorio
 | Nodo Proxmox | Comparte las 3 vCPU | 1,5 GB | Raíz de 28,4 GB y swap de 4 GB | Sistema y panel (en [pve-mejoras.txt](../evidencias/virtualbox/pve-mejoras.txt) se ve que usa 1,5 GiB) |
 | `srv-aso` (VM) | 1 vCPU | 1 GB | 10 GB en `local-lvm` | El servicio principal. Al ser VM gasta más que un LXC |
 | `cli-linux` (LXC) | 1 vCPU | 512 MB | 8 GB en `local-lvm` | Solo lo uso para probar el servicio |
-| Plantillas, ISOs, copias y margen | — | 1 GB de margen | 8,5 GB en `local-lvm` y 22,2 GB en la raíz | Para poder clonar y hacer copias sin quedarme sin sitio |
+| Plantillas, ISOs, copias y margen | — | 0,8 GiB de margen | 8,5 GB en `local-lvm` y 22,2 GB en la raíz | Para poder clonar y hacer copias sin quedarme sin sitio |
 
-- RAM: 4 GB − 1,5 del nodo − 1 de `srv-aso` − 0,5 de `cli-linux` = 1 GB que me sobra, y si hace falta el nodo tiene 4 GB de swap.
+- RAM: aunque a la VM le doy 4 GB, el nodo solo ve 3,8 GiB ([pve-mejoras.txt](../evidencias/virtualbox/pve-mejoras.txt)). 3,8 − 1,5 del nodo − 1 de `srv-aso` − 0,5 de `cli-linux` = 0,8 GiB de margen, y si hace falta el nodo tiene 4 GB de swap (que no cuento como RAM).
 - Disco: en `local-lvm` me quedan 26,5 − 10 − 8 = 8,5 GB para clones, y en la raíz 22,2 GB para plantillas, ISOs y copias.
 - CPU: las 3 vCPU se las reparten el nodo y los dos invitados. Como no van a hacer mucho, van bien los tres a la vez.
 
 No le doy a la VM todo lo que tiene el portátil, le dejo 3,6 GiB y 5 hilos a Debian para poder seguir usándolo.
+
+
+### 9. Actualización del nodo
+Antes de empezar con la plantilla actualicé el nodo, que tenía paquetes pendientes. Con `apt full-upgrade` se instalaron 225 paquetes sin ningún error ([pve-upgrade.txt](../evidencias/virtualbox/pve-upgrade.txt)). Entre ellos venía un kernel nuevo, así que reinicié el nodo.
+
+Después de reiniciar lo comprobé todo otra vez ([pve-tras-upgrade.txt](../evidencias/virtualbox/pve-tras-upgrade.txt)):
+- `pve-manager` ha pasado de 9.2.2 a 9.2.32 y el kernel de 7.0.2-6 a 7.0.14-30.
+- `vmbr0` y `vmbr1` siguen con sus IPs y la ruta por defecto sigue yendo por 10.0.2.1.
+- Los tres almacenamientos siguen activos.
+- `/dev/kvm` sigue existiendo.
+- `apt list --upgradable` da 0, así que no queda nada pendiente.
 
 ## Comandos usados
 
@@ -485,6 +496,9 @@ mkdir -p /srv/backup-lab
 pvesm add dir backup-lab --path /srv/backup-lab --content backup
 pvesm status; df -h /; lvs; vgs
 ls /sys/bus/virtio/drivers; lsblk; ip -d link show nic0; free -h
+apt update && apt full-upgrade -y
+reboot
+uptime; pveversion; uname -r; apt list --upgradable
 ```
 
 ## Evidencias
@@ -497,7 +511,9 @@ ls /sys/bus/virtio/drivers; lsblk; ip -d link show nic0; free -h
 - [pve-red-despues.txt](../evidencias/virtualbox/pve-red-despues.txt): `vmbr0` y `vmbr1` levantados, ruta por 10.0.2.1 y una sola regla NAT. Me falta probar el NAT desde los invitados en la fase 5.
 - [pve-conectividad.txt](../evidencias/virtualbox/pve-conectividad.txt): ping al gateway, DNS y el primer `apt update` con el error 401.
 - [nat-simple-error.txt](../evidencias/virtualbox/nat-simple-error.txt): el error del NAT simple de VirtualBox.
-- [pve-apt-update.txt](../evidencias/virtualbox/pve-apt-update.txt): `apt update` ya sin errores. Me quedan 213 paquetes por actualizar.
+- [pve-apt-update.txt](../evidencias/virtualbox/pve-apt-update.txt): `apt update` ya sin errores, con 213 paquetes pendientes en ese momento.
+- [pve-upgrade.txt](../evidencias/virtualbox/pve-upgrade.txt): la actualización completa (225 paquetes) sin errores.
+- [pve-tras-upgrade.txt](../evidencias/virtualbox/pve-tras-upgrade.txt): el nodo después de reiniciar, con la versión nueva, la red, los almacenamientos y KVM funcionando y 0 paquetes pendientes.
 - [pve-almacenamiento.txt](../evidencias/virtualbox/pve-almacenamiento.txt): `local`, `local-lvm` y `backup-lab` activos y cómo está repartido el disco.
 - [pve-mejoras.txt](../evidencias/virtualbox/pve-mejoras.txt): drivers virtio, `promiscuity 1` en `nic0` y 3,8 GiB de RAM en el nodo.
 - [vbox-vminfo.txt](../evidencias/virtualbox/vbox-vminfo.txt): VT-x anidado, KVM, virtio-scsi y las dos tarjetas virtio en modo promiscuo.
@@ -516,6 +532,6 @@ ls /sys/bus/virtio/drivers; lsblk; ip -d link show nic0; free -h
 - Los repositorios enterprise daban error 401 y los cambié por el No-Subscription.
 
 ## Conclusion
-Tengo el nodo igual que en el Mac pero ahora con KVM, que era lo que me faltaba. Así en la fase 5 `srv-aso` podrá ser una VM. Me queda actualizar los 213 paquetes, bajar las plantillas y comprobar que los invitados salen a Internet por el NAT.
+Tengo el nodo igual que en el Mac pero ahora con KVM, que era lo que me faltaba, y además actualizado. Así `srv-aso` podrá ser una VM. Me queda bajar las plantillas (fase 5) y comprobar en la fase 6 que los invitados salen a Internet por el NAT.
 
 [Volver al indice](../README.md)
