@@ -78,7 +78,7 @@ las evidencias utiles; evita frases generales como "he trabajado en Proxmox".
 
 - Objetivo: hacer lo que me dijo el profesor en la nota de seguimiento de la fase 4: actualizar el nodo y ajustar el margen de memoria.
 - Acciones realizadas: Actualicé el nodo con `apt full-upgrade` (225 paquetes) y lo reinicié porque venía un kernel nuevo. Cambié el reparto de RAM para usar los 3,8 GiB que ve el nodo. También empecé a rellenar la memoria técnica, pero el profesor nos dijo luego que todavía no había que rellenarla, así que la he dejado como estaba.
-- Decisiones y motivos: El servicio ASO todavía no lo elijo. Lo dejo para la fase 7 y en la ficha explico cómo lo voy a elegir. Al calcular la RAM uso lo medido (3,8 GiB) y no los 4 GB que le puse a la VM.
+- Decisiones y motivos: El servicio ASO todavía no lo he elegido. Al calcular la RAM uso lo medido (3,8 GiB) y no los 4 GB que le puse a la VM.
 - Pruebas y resultados: La actualización terminó sin errores. Después de reiniciar, `pveversion` da 9.2.32 con el kernel 7.0.14-30, la red y los almacenamientos siguen igual, `/dev/kvm` sigue existiendo y no queda ningún paquete por actualizar. El margen de RAM queda en 0,8 GiB.
 - Documentos o evidencias: [actualización del nodo](03-instalacion-proxmox.md#9-actualización-del-nodo); pve-upgrade.txt y pve-tras-upgrade.txt en evidencias/virtualbox/.
 - Incidencias y solucion o estado pendiente: Ninguna en la actualización. Me queda elegir el servicio ASO y poner su puerto.
@@ -92,6 +92,16 @@ las evidencias utiles; evita frases generales como "he trabajado en Proxmox".
 - Pruebas y resultados: Sin rol la cuenta no veía el estado del nodo. Con el rol veía el resumen y el `status`, pero el `syslog` daba 403 por falta de `Sys.Syslog`. Después de quitar el permiso el `status` volvió a dar 403. En `lvs` el thin pool está al 0 % de datos y al 1,58 % de metadatos.
 - Documentos o evidencias: [Fase 4 en VirtualBox](03-instalacion-proxmox.md#6-repositorios-y-almacenamiento); pve-discos-fase4.txt, pve-cuenta-lectura.txt y las capturas de discos, ISO, permisos y acceso en evidencias/virtualbox/.
 - Incidencias y solucion o estado pendiente: La primera vez la cuenta no podía ver nada ni con el rol. Con `pveum acl list` vi que la asignación no se había creado. La volví a hacer con `pveum acl modify` y ya funcionó. También hice unas pruebas sin darme cuenta en la ventana normal, que tenía la sesión de root, y el `syslog` sí se leía. Las repetí en la ventana privada con la cuenta limitada.
+- Siguiente paso: Empezar la fase 5: bajar las plantillas y preparar la plantilla Linux.
+
+## Sesion 10 - 25-11-2026
+
+- Objetivo: terminar las correcciones que me puso el profesor en la nota de seguimiento de la fase 4 y volver a subir la memoria técnica. Lo subo hoy porque el profesor me ha dado permiso.
+- Acciones realizadas: He repasado una por una las correcciones de la nota: el nodo está actualizado y comprobado después del reinicio, el margen de RAM ya está calculado con los 3,8 GiB que ve el nodo y el servicio ASO todavía no lo he elegido. Lo único que faltaba era la memoria técnica. La había quitado en la sesión 09 porque entendí que todavía no tocaba, pero he vuelto a subir la versión que tenía rellenada y le he añadido lo que hice en la sesión 09 (la revisión de discos, los permisos y la cuenta de solo lectura). También he puesto en el diseño de red y en la ficha que el nodo ve 3,8 GiB de los 4 GB de la VM.
+- Decisiones y motivos: Subo la memoria porque no sobra: el profesor en la nota decía que la memoria seguía como plantilla y que faltaba recoger lo que ya había construido, y en la guía de la fase 1 pone que en la sesión 3 ya había que concretar la necesidad, el alcance, los requisitos y los riesgos en la ficha y en la memoria. Las fases que todavía no he hecho (de la 5 en adelante) siguen como pendientes en la memoria.
+- Pruebas y resultados: He comprobado que todos los enlaces de la memoria van a documentos y evidencias que existen, y que los datos (versión 9.2.32, 3,8 GiB, 0,8 GiB de margen, cuentas y almacenamientos) son los mismos que en el 03 y en las evidencias.
+- Documentos o evidencias: [Memoria técnica](10-memoria-tecnica.md), [diseño de red](02-diagrama-red.md) y [ficha](00-ficha-inicial.md).
+- Incidencias y solucion o estado pendiente: Ninguna. Sigue pendiente elegir el servicio ASO y poner su puerto.
 - Siguiente paso: Empezar la fase 5: bajar las plantillas y preparar la plantilla Linux.
 
 Anadir una entrada con esta estructura en cada sesion. El historial de

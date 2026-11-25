@@ -31,7 +31,7 @@ Las máquinas invitadas van en la red host-only (`vmbr0`) porque así desde mi p
 
 | Elemento | Nombre | IP | Función | Recursos |
 |---|---|---|---|---|
-| Nodo Proxmox | `pve-pico` | 192.168.20.10 (gestión) / 10.0.2.100 | Hipervisor | 3 vCPU, 4 GB RAM, 70 GB disco fijo (VM de VirtualBox) |
+| Nodo Proxmox | `pve-pico` | 192.168.20.10 (gestión) / 10.0.2.100 | Hipervisor | 3 vCPU, 4 GB RAM (el nodo ve 3,8 GiB), 70 GB disco fijo (VM de VirtualBox) |
 | Servidor ASO | `srv-aso` | 192.168.20.101 | Servicio principal (___), VM | 1 vCPU, 1 GB, 10 GB |
 | Cliente | `cli-linux` | 192.168.20.102 | Pruebas, LXC | 1 vCPU, 512 MB, 8 GB |
 
